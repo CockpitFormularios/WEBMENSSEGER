@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp P2P - GitHub Pages</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg-primary: #111b21;
+            --bg-secondary: #202c33;
+            --bg-tertiary: #2a3942;
+            --bg-chat: #0b141a;
+            --text-primary: #e9edef;
+            --text-secondary: #8696a0;
+            --green-primary: #00a884;
+            --green-dark: #005c4b;
+            --bubble-sent: #005c4b;
+            --bubble-received: #202c33;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0a1014;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .phone-frame {
+            width: 100%;
+            max-width: 430px;
+            height: 100vh;
+            max-height: 900px;
+            background: var(--bg-primary);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+
+        @media (min-width: 431px) {
+            .phone-frame {
+                border-radius: 20px;
+                margin: 20px;
+                height: 90vh;
+            }
+        }
+
+        /* Splash Screen */
+        .splash {
+            background: var(--green-primary);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            gap: 20px;
+            animation: fadeIn 0.5s;
+        }
+
+        .splash-icon {
+            font-size: 80px;
+            animation: pulse 2s infinite;
+        }
+
+        .splash-title {
+            font-size: 32px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .splash-subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+            text-align: center;
+            padding: 0 40px;
+        }
+
+        /* Login Screen */
+        .login-screen {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 40px 30px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            gap: 20px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h2 {
+            font-size: 28px;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .input-group {
+            width: 100%;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid var(--bg-tertiary);
+            border-radius: 12px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 16px;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: var(--green-primary);
+            background: var(--bg-secondary);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: var(--green-primary);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            background: #00967a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,168,132,0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            font-size: 13px;
+            text-align: center;
+            display: none;
+            animation: shake 0.5s;
+        }
+
+        /* Main Chat Screen */
+        .main-screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .app-header {
+            background: var(--bg-secondary);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            min-height: 60px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            display: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            transition: 0.2s;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-button:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--green-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            position: relative;
+        }
+
+        .online-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--green-primary);
+            border-radius: 50%;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            border: 2px solid var(--bg-secondary);
+        }
+
+        .header-info {
+            flex: 1;
+        }
+
+        .header-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .header-status {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-button {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-button:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        /* Users List */
+        .users-list {
+            flex: 1;
+            overflow-y: auto;
+            background: var(--bg-primary);
+        }
+
+        .users-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .users-list::-webkit-scrollbar-thumb {
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+        }
+
+        .user-card {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            transition: 0.2s;
+            animation: slideIn 0.3s;
+        }
+
+        .user-card:hover {
+            background: var(--bg-secondary);
+        }
+
+        .user-card:active {
+            background: var(--bg-tertiary);
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-size: 17px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .user-preview {
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-secondary);
+            gap: 15px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+        }
+
+        /* Chat Area */
+        .chat-area {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            background: var(--bg-chat);
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="%23000" width="100" height="100" opacity="0.05"/></svg>');
+            background-size: 200px;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .messages-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+        }
+
+        .date-separator {
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .date-separator span {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-secondary);
+            padding: 5px 12px;
+            border-radius: 7px;
+            font-size: 12px;
+        }
+
+        .message-wrapper {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 2px;
+            animation: messageIn 0.3s;
+        }
+
+        .message-wrapper.sent {
+            align-items: flex-end;
+        }
+
+        .message-wrapper.received {
+            align-items: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 8px 12px;
+            position: relative;
+            word-wrap: break-word;
+            font-size: 14.2px;
+            line-height: 1.4;
+        }
+
+        .message-wrapper.sent .message-bubble {
+            background: var(--bubble-sent);
+            color: var(--text-primary);
+            border-radius: 8px 0 8px 8px;
+        }
+
+        .message-wrapper.received .message-bubble {
+            background: var(--bubble-received);
+            color: var(--text-primary);
+            border-radius: 0 8px 8px 8px;
+        }
+
+        .message-sender {
+            font-size: 12px;
+            color: #06cf9c;
+            margin-bottom: 3px;
+            font-weight: 600;
+            padding-left: 3px;
+        }
+
+        .message-footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 4px;
+            margin-top: 3px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .message-status {
+            font-size: 14px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .message-status.read {
+            color: #34b7f1;
+        }
+
+        /* Input Area */
+        .input-area {
+            background: var(--bg-secondary);
+            padding: 10px 16px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            min-height: 62px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 24px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 15px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .input-area input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .input-area input:focus {
+            background: #34404b;
+        }
+
+        .send-button {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--green-primary);
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .send-button:hover {
+            background: #00967a;
+            transform: scale(1.05);
+        }
+
+        .send-button:active {
+            transform: scale(0.95);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: none;
+            padding: 5px 20px;
+            color: var(--green-primary);
+            font-size: 12px;
+            font-style: italic;
+            background: var(--bg-chat);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateX(-20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+
+        @keyframes messageIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(10px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .loading-spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile optimization */
+        @media (max-width: 430px) {
+            .phone-frame {
+                max-height: 100vh;
+                border-radius: 0;
+                margin: 0;
+            }
+            
+            .message-bubble {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <!-- Splash Screen -->
+        <div id="splashScreen" class="splash">
+            <div class="splash-icon">💬</div>
+            <div class="splash-title">WhatsApp P2P</div>
+            <div class="splash-subtitle">Mensagens diretas sem armazenamento no servidor</div>
+            <div class="loading-spinner"></div>
+        </div>
+
+        <!-- Login Screen -->
+        <div id="loginScreen" class="login-screen">
+            <div class="login-header">
+                <h2>👋 Bem-vindo</h2>
+                <p>Escolha um nome para começar a conversar</p>
+            </div>
+            
+            <div class="input-group">
+                <label>Seu Nome</label>
+                <input 
+                    type="text" 
+                    id="usernameInput" 
+                    placeholder="Ex: João Silva" 
+                    maxlength="25"
+                    autocomplete="off"
+                >
+            </div>
+            
+            <div class="error-message" id="errorMessage"></div>
+            
+            <button class="btn-primary" onclick="handleLogin()">
+                Entrar no Chat
+            </button>
+            
+            <p style="color: var(--text-secondary); font-size: 11px; text-align: center; margin-top: 20px;">
+                🔒 Suas mensagens são transmitidas diretamente<br>
+                Nenhum dado é armazenado no servidor
+            </p>
+        </div>
+
+        <!-- Main Screen -->
+        <div id="mainScreen" class="main-screen">
+            <!-- Header -->
+            <div class="app-header">
+                <div class="header-left">
+                    <button class="back-button" id="backButton" onclick="goBackToUsers()">
+                        ←
+                    </button>
+                    <div class="avatar" id="headerAvatar">
+                        👤
+                        <div class="online-dot" id="onlineDot"></div>
+                    </div>
+                    <div class="header-info">
+                        <div class="header-name" id="headerName">Conversas</div>
+                        <div class="header-status" id="headerStatus">online</div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="icon-button" onclick="refreshUsers()" title="Atualizar">
+                        🔄
+                    </button>
+                    <button class="icon-button" onclick="handleLogout()" title="Sair">
+                        🚪
+                    </button>
+                </div>
+            </div>
+
+            <!-- Users List -->
+            <div class="users-list" id="usersList">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🔍</div>
+                    <div class="empty-state-text">Procurando usuários online...</div>
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+
+            <!-- Chat Area -->
+            <div class="chat-area" id="chatArea">
+                <div class="messages-container" id="messagesContainer"></div>
+                <div class="typing-indicator" id="typingIndicator">digitando...</div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-area" id="inputArea">
+                <input 
+                    type="text" 
+                    id="messageInput" 
+                    placeholder="Mensagem" 
+                    maxlength="1000"
+                    autocomplete="off"
+                >
+                <button class="send-button" id="sendButton" onclick="sendMessage()">
+                    ➤
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== CONFIGURAÇÃO ====================
+        // Substitua com seus dados do Supabase
+        const SUPABASE_URL = 'https://SEU_PROJETO.supabase.co';
+        const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON';
+        
+        // Inicializar Supabase
+        let supabase;
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch (error) {
+            console.error('Erro ao inicializar Supabase:', error);
+        }
+
+        // ==================== ESTADO DA APLICAÇÃO ====================
+        let currentUser = null;
+        let currentChat = null;
+        let messageChannel = null;
+        let presenceChannel = null;
+        let onlineUsers = new Map();
+
+        // ==================== FUNÇÕES DE UI ====================
+        function showScreen(screenId) {
+            const screens = ['splashScreen', 'loginScreen', 'mainScreen'];
+            screens.forEach(id => {
+                document.getElementById(id).style.display = 'none';
+            });
+            document.getElementById(screenId).style.display = 'flex';
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            setTimeout(() => {
+                errorEl.style.display = 'none';
+            }, 3000);
+        }
+
+        // ==================== AUTENTICAÇÃO ====================
+        function generateUserId(username) {
+            // Criar um ID único baseado no username
+            return 'user_' + btoa(username.toLowerCase().trim()).replace(/[/+=]/g, '').substring(0, 20);
+        }
+
+        async function handleLogin() {
+            const username = document.getElementById('usernameInput').value.trim();
+            
+            if (!username) {
+                showError('Por favor, digite um nome');
+                return;
+            }
+            
+            if (username.length < 2) {
+                showError('Nome muito curto (mínimo 2 caracteres)');
+                return;
+            }
+
+            if (username.length > 25) {
+                showError('Nome muito longo (máximo 25 caracteres)');
+                return;
+            }
+
+            // Criar usuário
+            currentUser = {
+                id: generateUserId(username),
+                username: username,
+                created: Date.now()
+            };
+
+            // Salvar sessão
+            localStorage.setItem('wp2p_user', JSON.stringify(currentUser));
+            
+            // Registrar presença
+            await updatePresence(true);
+            
+            // Mostrar tela principal
+            showScreen('mainScreen');
+            document.getElementById('headerName').textContent = 'Conversas';
+            document.getElementById('headerStatus').textContent = 'online';
+            document.getElementById('onlineDot').style.display = 'block';
+            
+            // Carregar usuários
+            await loadOnlineUsers();
+            subscribeToPresence();
+            
+            // Mostrar lista de usuários
+            showUsersList();
+        }
+
+        async function handleLogout() {
+            if (currentUser) {
+                await updatePresence(false);
+            }
+            
+            // Limpar canais
+            if (messageChannel) {
+                supabase.removeChannel(messageChannel);
+                messageChannel = null;
+            }
+            if (presenceChannel) {
+                supabase.removeChannel(presenceChannel);
+                presenceChannel = null;
+            }
+            
+            localStorage.removeItem('wp2p_user');
+            currentUser = null;
+            currentChat = null;
+            onlineUsers.clear();
+            
+            showScreen('loginScreen');
+            document.getElementById('usernameInput').value = '';
+        }
+
+        // ==================== PRESENÇA ====================
+        async function updatePresence(online) {
+            if (!currentUser) return;
+            
+            try {
+                // Usar broadcast para presença em vez de tabela
+                const channel = supabase.channel('presence_global');
+                
+                await channel.subscribe(async (status) => {
+                    if (status === 'SUBSCRIBED') {
+                        await channel.send({
+                            type: 'broadcast',
+                            event: 'presence_update',
+                            payload: {
+                                user_id: currentUser.id,
+                                username: currentUser.username,
+                                online: online,
+                                timestamp: Date.now()
+                            }
+                        });
+                    }
+                });
+                
+                // Pequeno delay para garantir envio
+                await new Promise(resolve => setTimeout(resolve, 100));
+                supabase.removeChannel(channel);
+                
+            } catch (error) {
+                console.error('Erro ao atualizar presença:', error);
+            }
+        }
+
+        function subscribeToPresence() {
+            if (presenceChannel) {
+                supabase.removeChannel(presenceChannel);
+            }
+            
+            presenceChannel = supabase.channel('presence_global');
+            
+            presenceChannel
+                .on('broadcast', { event: 'presence_update' }, (payload) => {
+                    handlePresenceUpdate(payload.payload);
+                })
+                .subscribe();
+        }
+
+        function handlePresenceUpdate(data) {
+            if (!currentUser || data.user_id === currentUser.id) return;
+            
+            if (data.online) {
+                onlineUsers.set(data.user_id, {
+                    id: data.user_id,
+                    username: data.username,
+                    lastSeen: data.timestamp
+                });
+            } else {
+                onlineUsers.delete(data.user_id);
+            }
+            
+            // Atualizar UI
+            if (!currentChat) {
+                renderUsersList();
+            } else if (currentChat.id === data.user_id) {
+                updateChatHeader();
+            }
+        }
+
+        async function loadOnlineUsers() {
+            // Broadcast para solicitar presença de todos
+            const channel = supabase.channel('presence_global');
+            
+            await channel.subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') {
+                    await channel.send({
+                        type: 'broadcast',
+                        event: 'presence_request',
+                        payload: {
+                            requester_id: currentUser.id
+                        }
+                    });
+                }
+            });
+            
+            // Aguardar respostas
+            await new Promise(resolve => setTimeout(resolve, 500));
+            supabase.removeChannel(channel);
+            
+            renderUsersList();
+        }
+
+        function renderUsersList() {
+            const usersListEl = document.getElementById('usersList');
+            const users = Array.from(onlineUsers.values())
+                .filter(u => u.id !== currentUser.id);
+            
+            if (users.length === 0) {
+                usersListEl.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👥</div>
+                        <div class="empty-state-text">Nenhum usuário online no momento</div>
+                        <p style="color: var(--text-secondary); font-size: 13px;">
+                            Abra em outro navegador para testar
+                        </p>
+                        <button class="btn-primary" style="width: auto; padding: 10px 30px; font-size: 14px;" onclick="refreshUsers()">
+                            Atualizar Lista
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            usersListEl.innerHTML = users.map(user => `
+                <div class="user-card" onclick="openChat('${user.id}', '${escapeHtml(user.username)}')">
+                    <div class="user-avatar">
+                        ${getInitials(user.username)}
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">${escapeHtml(user.username)}</div>
+                        <div class="user-preview">Online agora</div>
+                    </div>
+                    <div class="user-time">agora</div>
+                </div>
+            `).join('');
+        }
+
+        function refreshUsers() {
+            document.getElementById('usersList').innerHTML = `
+                <div class="empty-state">
+                    <div class="loading-spinner"></div>
+                    <div class="empty-state-text">Atualizando...</div>
+                </div>
+            `;
+            loadOnlineUsers();
+        }
+
+        // ==================== CHAT ====================
+        function showUsersList() {
+            document.getElementById('usersList').style.display = 'block';
+            document.getElementById('chatArea').style.display = 'none';
+            document.getElementById('inputArea').style.display = 'none';
+            document.getElementById('backButton').style.display = 'none';
+            document.getElementById('headerName').textContent = 'Conversas';
+            document.getElementById('headerStatus').textContent = 'online';
+            document.getElementById('headerAvatar').innerHTML = '👤';
+        }
+
+        function showChat() {
+            document.getElementById('usersList').style.display = 'none';
+            document.getElementById('chatArea').style.display = 'flex';
+            document.getElementById('inputArea').style.display = 'flex';
+            document.getElementById('backButton').style.display = 'flex';
+        }
+
+        async function openChat(userId, username) {
+            currentChat = {
+                id: userId,
+                username: username
+            };
+            
+            // Atualizar header
+            document.getElementById('headerName').textContent = username;
+            document.getElementById('headerAvatar').textContent = getInitials(username);
+            updateChatHeader();
+            
+            // Mostrar chat
+            showChat();
+            
+            // Limpar mensagens anteriores
+            document.getElementById('messagesContainer').innerHTML = '';
+            
+            // Carregar mensagens do cache local
+            loadLocalMessages();
+            
+            // Inscrever no canal de mensagens
+            subscribeToMessages();
+        }
+
+        function updateChatHeader() {
+            if (!currentChat) return;
+            
+            const user = onlineUsers.get(currentChat.id);
+            if (user) {
+                document.getElementById('headerStatus').textContent = 'online';
+                document.getElementById('onlineDot').style.display = 'block';
+            } else {
+                document.getElementById('headerStatus').textContent = 'offline';
+                document.getElementById('onlineDot').style.display = 'none';
+            }
+        }
+
+        function goBackToUsers() {
+            // Desinscrever do canal de mensagens
+            if (messageChannel) {
+                supabase.removeChannel(messageChannel);
+                messageChannel = null;
+            }
+            
+            currentChat = null;
+            showUsersList();
+            renderUsersList();
+        }
+
+        // ==================== MENSAGENS ====================
+        function subscribeToMessages() {
+            if (messageChannel) {
+                supabase.removeChannel(messageChannel);
+            }
+            
+            const channelName = getChannelName(currentUser.id, currentChat.id);
+            
+            messageChannel = supabase.channel(channelName);
+            
+            messageChannel
+                .on('broadcast', { event: 'message' }, (payload) => {
+                    receiveMessage(payload.payload);
+                })
+                .subscribe();
+        }
+
+        function getChannelName(userId1, userId2) {
+            // Canal único para o par de usuários
+            return 'chat_' + [userId1, userId2].sort().join('_');
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message || !currentChat) return;
+            
+            const messageData = {
+                id: generateMessageId(),
+                sender_id: currentUser.id,
+                sender_name: currentUser.username,
+                receiver_id: currentChat.id,
+                content: message,
+                timestamp: Date.now()
+            };
+            
+            try {
+                const channelName = getChannelName(currentUser.id, currentChat.id);
+                
+                await supabase.channel(channelName).send({
+                    type: 'broadcast',
+                    event: 'message',
+                    payload: messageData
+                });
+                
+                // Mostrar mensagem enviada
+                displayMessage(messageData, true);
+                
+                // Salvar no cache local
+                saveMessageLocally(messageData);
+                
+                // Limpar input
+                input.value = '';
+                input.focus();
+                
+            } catch (error) {
+                console.error('Erro ao enviar mensagem:', error);
+                showError('Erro ao enviar. Tente novamente.');
+            }
+        }
+
+        function receiveMessage(messageData) {
+            // Verificar se é do chat atual
+            if (currentChat && 
+                (messageData.sender_id === currentChat.id || 
+                 messageData.sender_id === currentUser.id)) {
+                displayMessage(messageData, messageData.sender_id === currentUser.id);
+                saveMessageLocally(messageData);
+                
+                // Reproduzir som de notificação (opcional)
+                playNotificationSound();
+            }
+        }
+
+        function displayMessage(messageData, isSent) {
+            const container = document.getElementById('messagesContainer');
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = `message-wrapper ${isSent ? 'sent' : 'received'}`;
+            
+            const time = new Date(messageData.timestamp).toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            wrapper.innerHTML = `
+                ${!isSent ? `<div class="message-sender">${escapeHtml(messageData.sender_name)}</div>` : ''}
+                <div class="message-bubble">
+                    ${formatMessage(messageData.content)}
+                </div>
+                <div class="message-footer">
+                    <span class="message-time">${time}</span>
+                </div>
+            `;
+            
+            container.appendChild(wrapper);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function generateMessageId() {
+            return 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function formatMessage(text) {
+            // Converter URLs em links
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            text = text.replace(urlRegex, url => `<a href="${url}" target="_blank" style="color: #81c3ff;">${url}</a>`);
+            
+            // Converter emojis básicos
+            text = text.replace(/:\)/g, '😊');
+            text = text.replace(/:\(/g, '😢');
+            text = text.replace(/:D/g, '😃');
+            text = text.replace(/:P/g, '😛');
+            text = text.replace(/<3/g, '❤️');
+            
+            return text;
+        }
+
+        // ==================== ARMAZENAMENTO LOCAL ====================
+        function saveMessageLocally(messageData) {
+            const cacheKey = getChannelName(messageData.sender_id, messageData.receiver_id);
+            let messages = JSON.parse(localStorage.getItem('wp2p_' + cacheKey) || '[]');
+            
+            // Evitar duplicatas
+            if (!messages.find(m => m.id === messageData.id)) {
+                messages.push(messageData);
+                
+                // Limitar a 200 mensagens
+                if (messages.length > 200) {
+                    messages = messages.slice(-200);
+                }
+                
+                localStorage.setItem('wp2p_' + cacheKey, JSON.stringify(messages));
+            }
+        }
+
+        function loadLocalMessages() {
+            if (!currentChat) return;
+            
+            const cacheKey = getChannelName(currentUser.id, currentChat.id);
+            const messages = JSON.parse(localStorage.getItem('wp2p_' + cacheKey) || '[]');
+            
+            document.getElementById('messagesContainer').innerHTML = '';
+            
+            messages.forEach(msg => {
+                const isSent = msg.sender_id === currentUser.id;
+                displayMessage(msg, isSent);
+            });
+        }
+
+        // ==================== NOTIFICAÇÕES ====================
+        function playNotificationSound() {
+            // Criar som simples com Web Audio API
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                gainNode.gain.value = 0.1;
+                
+                oscillator.start();
+                setTimeout(() => {
+                    oscillator.stop();
+                    audioContext.close();
+                }, 200);
+            } catch (e) {
+                // Ignorar erros de áudio
+            }
+        }
+
+        // ==================== UTILITÁRIOS ====================
+        function getInitials(name) {
+            return name
+                .split(' ')
+                .map(word => word[0])
+                .join('')
+                .substring(0, 2)
+                .toUpperCase();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ==================== EVENT LISTENERS ====================
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Enviar presença periodicamente
+        setInterval(() => {
+            if (currentUser) {
+                updatePresence(true);
+            }
+        }, 30000); // A cada 30 segundos
+
+        // Limpar ao fechar
+        window.addEventListener('beforeunload', () => {
+            if (currentUser) {
+                updatePresence(false);
+            }
+        });
+
+        // ==================== INICIALIZAÇÃO ====================
+        async function init() {
+            // Mostrar splash
+            showScreen('splashScreen');
+            
+            // Aguardar carregamento
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // Verificar sessão
+            const savedUser = localStorage.getItem('wp2p_user');
+            
+            if (savedUser && supabase) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    
+                    // Registrar presença
+                    await updatePresence(true);
+                    
+                    // Inscrever na presença
+                    subscribeToPresence();
+                    
+                    // Mostrar tela principal
+                    showScreen('mainScreen');
+                    document.getElementById('headerName').textContent = 'Conversas';
+                    
+                    // Carregar usuários
+                    await loadOnlineUsers();
+                    showUsersList();
+                    
+                    return;
+                } catch (error) {
+                    console.error('Erro ao restaurar sessão:', error);
+                }
+            }
+            
+            // Mostrar login
+            showScreen('loginScreen');
+        }
+
+        // Iniciar aplicação
+        init();
+    </script>
+</body>
+</html>
