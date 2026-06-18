@@ -144,6 +144,7 @@
     </div>
 
     <script>
+        // ==================== CONFIGURAÇÃO ====================
         const sb = window.supabase.createClient(
             'https://fqbxhkcdefwsuefifygk.supabase.co',
             'sb_publishable_jC8Ntyx8QD2FHkP8Bqa63A_sLljd1Fj'
@@ -152,10 +153,13 @@
         let currentUser = null;
         let activeChat = null;
         let presenceChannel = null;
-        let msgChannels = {};
+        let messageChannel = null; // UM ÚNICO canal de mensagens
         let onlineUsers = {};
         let lastMsgs = {};
 
+        console.log('✅ App iniciado');
+
+        // ==================== LOGIN ====================
         function entrar() {
             const name = document.getElementById('nameInput').value.trim();
             if (!name || name.length < 2) return alert('Digite um nome com pelo menos 2 caracteres');
@@ -168,6 +172,8 @@
             document.getElementById('myAvatar').textContent = getInitials(name);
             document.getElementById('myAvatar').style.background = currentUser.color;
 
+            console.log('✅ Login:', name);
+            
             connectPresence();
             setTimeout(() => announcePresence(), 500);
             setTimeout(() => requestUsers(), 1500);
@@ -175,9 +181,13 @@
 
         function logout() {
             if (presenceChannel) { sb.removeChannel(presenceChannel); presenceChannel = null; }
-            Object.values(msgChannels).forEach(ch => sb.removeChannel(ch));
-            msgChannels = {};
-            currentUser = null; activeChat = null; onlineUsers = {}; lastMsgs = {};
+            if (messageChannel) { sb.removeChannel(messageChannel); messageChannel = null; }
+            
+            currentUser = null; 
+            activeChat = null; 
+            onlineUsers = {}; 
+            lastMsgs = {};
+            
             localStorage.removeItem('wp_user');
             document.getElementById('loginModal').style.display = 'flex';
             document.getElementById('nameInput').value = '';
@@ -188,9 +198,14 @@
             showEmptyContacts();
         }
 
+        // ==================== PRESENÇA ====================
         function connectPresence() {
             if (presenceChannel) sb.removeChannel(presenceChannel);
-            presenceChannel = sb.channel('presence_v4', { config: { broadcast: { self: true } } });
+            
+            presenceChannel = sb.channel('presence_v5', { 
+                config: { broadcast: { self: true } } 
+            });
+            
             presenceChannel
                 .on('broadcast', { event: 'user_online' }, (payload) => {
                     const user = payload.payload;
@@ -203,7 +218,10 @@
                     if (currentUser) announcePresence();
                 })
                 .subscribe((status) => {
-                    if (status === 'SUBSCRIBED') requestUsers();
+                    console.log('📡 Presença:', status);
+                    if (status === 'SUBSCRIBED') {
+                        requestUsers();
+                    }
                 });
         }
 
@@ -257,8 +275,16 @@
             document.getElementById('contactList').innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div><div class="empty-title">WhatsApp Web</div><div class="empty-text">Clique em atualizar para<br>encontrar contatos online</div><button class="empty-btn" onclick="refreshContacts()">🔄 Buscar Contatos</button></div>';
         }
 
+        // ==================== CHAT ====================
         function openChat(userId, userName, userColor) {
+            // Fechar canal anterior
+            if (messageChannel) {
+                sb.removeChannel(messageChannel);
+                messageChannel = null;
+            }
+            
             activeChat = { id: userId, name: userName, color: userColor };
+            
             document.getElementById('welcomeScreen').style.display = 'none';
             document.getElementById('chatHeader').style.display = 'flex';
             document.getElementById('messagesArea').style.display = 'block';
@@ -268,60 +294,121 @@
             document.getElementById('chatAvatar').textContent = getInitials(userName);
             document.getElementById('chatAvatar').style.background = userColor || 'linear-gradient(135deg, #667eea, #764ba2)';
             document.getElementById('messagesArea').innerHTML = '';
-            createMsgChannel(userId);
+            
+            // Criar UM canal de mensagens para este chat
+            createMessageChannel(userId);
+            
+            // Carregar mensagens
             loadMessages();
-            if (window.innerWidth <= 768) document.getElementById('mainChat').classList.add('active');
+            
+            if (window.innerWidth <= 768) {
+                document.getElementById('mainChat').classList.add('active');
+            }
+            
             renderContacts();
         }
 
         function closeChat() {
+            if (messageChannel) {
+                sb.removeChannel(messageChannel);
+                messageChannel = null;
+            }
+            
             activeChat = null;
+            
             document.getElementById('welcomeScreen').style.display = 'flex';
             document.getElementById('chatHeader').style.display = 'none';
             document.getElementById('messagesArea').style.display = 'none';
             document.getElementById('inputBar').style.display = 'none';
             document.getElementById('messagesArea').innerHTML = '';
-            if (window.innerWidth <= 768) document.getElementById('mainChat').classList.remove('active');
+            
+            if (window.innerWidth <= 768) {
+                document.getElementById('mainChat').classList.remove('active');
+            }
+            
             renderContacts();
         }
 
-        function createMsgChannel(userId) {
-            if (msgChannels[userId]) return;
+        // ==================== MENSAGENS - SISTEMA CORRIGIDO ====================
+        function createMessageChannel(userId) {
             const channelName = 'chat_' + [currentUser.id, userId].sort().join('_');
-            const channel = sb.channel(channelName);
-            channel.on('broadcast', { event: 'msg' }, (payload) => {
+            
+            console.log('📡 Criando canal de mensagens:', channelName);
+            
+            messageChannel = sb.channel(channelName);
+            
+            // Escutar mensagens recebidas
+            messageChannel.on('broadcast', { event: 'msg' }, (payload) => {
                 const msg = payload.payload;
+                console.log('📨 Mensagem recebida:', msg.text);
+                
+                // Salvar no cache
                 saveMessage(msg);
+                
+                // Atualizar última mensagem
                 const otherId = msg.from === currentUser.id ? msg.to : msg.from;
                 lastMsgs[otherId] = { text: msg.text, timestamp: msg.timestamp };
-                if (activeChat && (msg.from === activeChat.id || msg.to === activeChat.id)) {
-                    displayMessage(msg, msg.from === currentUser.id);
+                
+                // Mostrar na tela se for do chat ativo
+                if (activeChat && msg.from === activeChat.id) {
+                    displayMessage(msg, false);
                 }
+                
                 renderContacts();
-            }).subscribe();
-            msgChannels[userId] = channel;
+            }).subscribe((status) => {
+                if (status === 'SUBSCRIBED') {
+                    console.log('✅ Canal de mensagens ativo!');
+                } else {
+                    console.log('📊 Status canal:', status);
+                }
+            });
         }
 
-        async function sendMsg() {
+        function sendMsg() {
             const input = document.getElementById('msgInput');
             const text = input.value.trim();
+            
             if (!text || !activeChat) return;
             
-            const msg = { id: 'msg_' + Date.now(), from: currentUser.id, fromName: currentUser.name, to: activeChat.id, text: text, timestamp: Date.now() };
+            const msg = {
+                id: 'msg_' + Date.now(),
+                from: currentUser.id,
+                fromName: currentUser.name,
+                to: activeChat.id,
+                text: text,
+                timestamp: Date.now()
+            };
+            
+            console.log('📤 Enviando mensagem:', text);
+            
+            // Mostrar na tela IMEDIATAMENTE
             displayMessage(msg, true);
+            
+            // Salvar no cache
             saveMessage(msg);
+            
+            // Atualizar última mensagem
             lastMsgs[activeChat.id] = { text: text, timestamp: msg.timestamp };
+            
+            // Limpar input
             input.value = '';
             updateSendBtn();
             
-            const channelName = 'chat_' + [currentUser.id, activeChat.id].sort().join('_');
-            const ch = sb.channel(channelName);
-            ch.subscribe(async (status) => {
-                if (status === 'SUBSCRIBED') {
-                    await ch.send({ type: 'broadcast', event: 'msg', payload: msg });
-                    setTimeout(() => sb.removeChannel(ch), 300);
-                }
-            });
+            // Enviar via broadcast NO MESMO CANAL
+            if (messageChannel) {
+                messageChannel.send({
+                    type: 'broadcast',
+                    event: 'msg',
+                    payload: msg
+                }).then(() => {
+                    console.log('✅ Mensagem enviada com sucesso!');
+                }).catch(err => {
+                    console.error('❌ Erro ao enviar:', err);
+                });
+            } else {
+                console.error('❌ Canal de mensagens não existe!');
+            }
+            
             renderContacts();
         }
 
@@ -329,7 +416,17 @@
             const container = document.getElementById('messagesArea');
             const div = document.createElement('div');
             div.className = 'msg ' + (sent ? 'sent' : 'received');
-            div.innerHTML = `${!sent ? '<div class="msg-sender">~'+esc(msg.fromName)+'</div>' : ''}<div class="msg-bubble">${esc(msg.text)}<span class="msg-time">${formatTime(msg.timestamp)}</span></div>`;
+            
+            const time = formatTime(msg.timestamp);
+            
+            div.innerHTML = `
+                ${!sent ? '<div class="msg-sender">~' + esc(msg.fromName) + '</div>' : ''}
+                <div class="msg-bubble">
+                    ${esc(msg.text)}
+                    <span class="msg-time">${time}</span>
+                </div>
+            `;
+            
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
         }
@@ -337,6 +434,7 @@
         function saveMessage(msg) {
             const key = 'wp_msgs_' + [msg.from, msg.to].sort().join('_');
             let msgs = JSON.parse(localStorage.getItem(key) || '[]');
+            
             if (!msgs.find(m => m.id === msg.id)) {
                 msgs.push(msg);
                 if (msgs.length > 300) msgs = msgs.slice(-300);
@@ -346,24 +444,70 @@
 
         function loadMessages() {
             if (!activeChat) return;
+            
             const key = 'wp_msgs_' + [currentUser.id, activeChat.id].sort().join('_');
             const msgs = JSON.parse(localStorage.getItem(key) || '[]');
+            
             document.getElementById('messagesArea').innerHTML = '';
-            msgs.forEach(msg => displayMessage(msg, msg.from === currentUser.id));
+            msgs.forEach(msg => {
+                displayMessage(msg, msg.from === currentUser.id);
+            });
         }
 
-        function getInitials(name) { return name.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || '?'; }
-        function getColor() { const c = ['linear-gradient(135deg, #667eea, #764ba2)','linear-gradient(135deg, #f093fb, #f5576c)','linear-gradient(135deg, #4facfe, #00f2fe)','linear-gradient(135deg, #43e97b, #38f9d7)']; return c[Math.floor(Math.random()*c.length)]; }
-        function formatTime(ts) { const d = new Date(ts); return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0'); }
-        function esc(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
-        function updateSendBtn() { const b = document.getElementById('sendBtn'); const i = document.getElementById('msgInput'); if(i.value.trim()){b.textContent='➤';b.classList.add('active');}else{b.textContent='🎤';b.classList.remove('active');} }
-
-        document.getElementById('msgInput').addEventListener('input', updateSendBtn);
-        document.getElementById('msgInput').addEventListener('keypress', function(e) { if(e.key==='Enter') sendMsg(); });
-        document.getElementById('nameInput').addEventListener('keypress', function(e) { if(e.key==='Enter') entrar(); });
+        // ==================== UTILITÁRIOS ====================
+        function getInitials(name) { 
+            return name.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || '?'; 
+        }
         
-        setInterval(() => { if(currentUser) announcePresence(); }, 25000);
+        function getColor() { 
+            const c = [
+                'linear-gradient(135deg, #667eea, #764ba2)',
+                'linear-gradient(135deg, #f093fb, #f5576c)',
+                'linear-gradient(135deg, #4facfe, #00f2fe)',
+                'linear-gradient(135deg, #43e97b, #38f9d7)'
+            ]; 
+            return c[Math.floor(Math.random() * c.length)]; 
+        }
+        
+        function formatTime(ts) { 
+            const d = new Date(ts); 
+            return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0'); 
+        }
+        
+        function esc(text) { 
+            const div = document.createElement('div'); 
+            div.textContent = text; 
+            return div.innerHTML; 
+        }
+        
+        function updateSendBtn() { 
+            const b = document.getElementById('sendBtn'); 
+            const i = document.getElementById('msgInput'); 
+            if(i.value.trim()) {
+                b.textContent = '➤'; 
+                b.classList.add('active');
+            } else {
+                b.textContent = '🎤'; 
+                b.classList.remove('active');
+            } 
+        }
 
+        // ==================== EVENTOS ====================
+        document.getElementById('msgInput').addEventListener('input', updateSendBtn);
+        
+        document.getElementById('msgInput').addEventListener('keypress', function(e) { 
+            if(e.key === 'Enter') sendMsg(); 
+        });
+        
+        document.getElementById('nameInput').addEventListener('keypress', function(e) { 
+            if(e.key === 'Enter') entrar(); 
+        });
+        
+        setInterval(() => { 
+            if(currentUser) announcePresence(); 
+        }, 25000);
+
+        // Auto-login
         window.addEventListener('load', () => {
             const saved = localStorage.getItem('wp_user');
             if(saved) {
@@ -373,10 +517,13 @@
                     document.getElementById('myName').textContent = currentUser.name;
                     document.getElementById('myAvatar').textContent = getInitials(currentUser.name);
                     document.getElementById('myAvatar').style.background = currentUser.color;
+                    
                     connectPresence();
                     setTimeout(() => announcePresence(), 500);
                     setTimeout(() => requestUsers(), 1500);
-                } catch(e) { localStorage.removeItem('wp_user'); }
+                } catch(e) { 
+                    localStorage.removeItem('wp_user'); 
+                }
             }
         });
     </script>
