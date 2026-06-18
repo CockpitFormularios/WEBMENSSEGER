@@ -71,7 +71,7 @@
         .audio-duration { font-size: 12px; color: #667781; flex-shrink: 0; min-width: 30px; text-align: right; }
         .msg.sent .audio-duration { color: #8696a0; }
         
-        /* Input bar - CORRIGIDO */
+        /* Input bar */
         .input-bar { 
             background: #f0f2f5; 
             padding: 5px 10px; 
@@ -81,35 +81,38 @@
             position: relative;
             min-height: 55px;
         }
-        .input-bar input { 
-            flex: 1; 
-            padding: 9px 12px; 
-            border: none; 
-            border-radius: 8px; 
-            background: #fff; 
-            font-size: 15px; 
-            outline: none; 
-            color: #111b21;
-            min-width: 0;
-        }
+        .input-bar input { flex: 1; padding: 9px 12px; border: none; border-radius: 8px; background: #fff; font-size: 15px; outline: none; color: #111b21; min-width: 0; }
         .input-bar input::placeholder { color: #667781; }
-        .input-bar button { 
-            width: 42px; 
-            height: 42px; 
-            border-radius: 50%; 
-            border: none; 
-            background: none; 
-            font-size: 22px; 
-            cursor: pointer; 
-            color: #54656f; 
-            flex-shrink: 0; 
-            display: flex !important; 
-            align-items: center; 
-            justify-content: center; 
-            transition: 0.15s; 
-        }
+        .input-bar button { width: 42px; height: 42px; border-radius: 50%; border: none; background: none; font-size: 22px; cursor: pointer; color: #54656f; flex-shrink: 0; display: flex !important; align-items: center; justify-content: center; transition: 0.15s; }
         .input-bar button:hover { background: #d9dbdd; }
         #sendBtn { color: #00a884 !important; }
+        
+        /* Emoji picker - FUNCIONAL */
+        .emoji-picker {
+            position: absolute;
+            bottom: 60px;
+            left: 10px;
+            width: 350px;
+            max-height: 380px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.25);
+            display: none;
+            flex-direction: column;
+            z-index: 100;
+            overflow: hidden;
+        }
+        .emoji-picker.show { display: flex; }
+        .emoji-picker-tabs { display: flex; border-bottom: 1px solid #e9edef; background: #f0f2f5; overflow-x: auto; }
+        .emoji-tab { flex: 1; min-width: 45px; padding: 10px 5px; text-align: center; cursor: pointer; font-size: 18px; border-bottom: 3px solid transparent; transition: 0.2s; }
+        .emoji-tab:hover { background: #e8eaed; }
+        .emoji-tab.active { border-bottom-color: #00a884; }
+        .emoji-grid { flex: 1; overflow-y: auto; padding: 8px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .emoji-grid::-webkit-scrollbar { width: 4px; }
+        .emoji-grid::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+        .emoji-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 26px; cursor: pointer; border-radius: 8px; transition: 0.15s; user-select: none; }
+        .emoji-cell:hover { background: #f0f2f5; transform: scale(1.3); }
+        .emoji-cell:active { transform: scale(0.9); background: #e8eaed; }
         
         /* Recording overlay */
         .recording-overlay {
@@ -117,19 +120,9 @@
             background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 9999;
         }
         .recording-overlay.show { display: flex; }
-        .recording-box {
-            background: #1e272e; padding: 30px 50px; border-radius: 20px; text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5); min-width: 280px;
-        }
-        .recording-mic {
-            width: 80px; height: 80px; border-radius: 50%; background: #ea0038;
-            margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;
-            font-size: 35px; animation: micPulse 1.5s infinite;
-        }
-        @keyframes micPulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(234,0,56,0.5); }
-            50% { box-shadow: 0 0 0 25px rgba(234,0,56,0); }
-        }
+        .recording-box { background: #1e272e; padding: 30px 50px; border-radius: 20px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5); min-width: 280px; }
+        .recording-mic { width: 80px; height: 80px; border-radius: 50%; background: #ea0038; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 35px; animation: micPulse 1.5s infinite; }
+        @keyframes micPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(234,0,56,0.5); } 50% { box-shadow: 0 0 0 25px rgba(234,0,56,0); } }
         .recording-timer { font-size: 42px; font-weight: 300; color: white; margin-bottom: 8px; }
         .recording-hint { font-size: 13px; color: #999; margin-bottom: 20px; }
         .recording-actions { display: flex; gap: 15px; justify-content: center; }
@@ -162,6 +155,9 @@
             .btn-back { display: block; }
             .messages-area { padding: 15px; }
             .msg-bubble { max-width: 85%; }
+            .emoji-picker { width: calc(100vw - 20px); left: 10px; bottom: 60px; }
+            .emoji-grid { grid-template-columns: repeat(7, 1fr); }
+            .emoji-cell { font-size: 28px; }
         }
     </style>
 </head>
@@ -195,12 +191,26 @@
             </div>
             <div class="messages-area" id="messagesArea"></div>
             
-            <!-- BARRA DE INPUT CORRIGIDA - BOTÕES SEMPRE VISÍVEIS -->
             <div class="input-bar" id="inputBar" style="display:none;">
-                <button onclick="toggleEmojiPicker()" title="Emojis">😀</button>
+                <button id="emojiBtn" onclick="toggleEmojiPicker()" title="Emojis">😀</button>
                 <input type="text" id="msgInput" placeholder="Mensagem" maxlength="1000" autocomplete="off">
-                <button id="micBtn" onmousedown="startRecording()" onmouseup="stopRecording()" title="Gravar áudio">🎤</button>
+                <button id="micBtn" onmousedown="startRecording()" onmouseup="stopRecording()" ontouchstart="startRecording()" ontouchend="stopRecording()" title="Gravar áudio">🎤</button>
                 <button id="sendBtn" onclick="sendMsg()" title="Enviar">➤</button>
+                
+                <!-- SELETOR DE EMOJIS -->
+                <div class="emoji-picker" id="emojiPicker">
+                    <div class="emoji-picker-tabs" id="emojiTabs">
+                        <div class="emoji-tab active" data-cat="recent">🕐</div>
+                        <div class="emoji-tab" data-cat="smileys">😀</div>
+                        <div class="emoji-tab" data-cat="people">👋</div>
+                        <div class="emoji-tab" data-cat="animals">🐱</div>
+                        <div class="emoji-tab" data-cat="food">🍕</div>
+                        <div class="emoji-tab" data-cat="travel">✈️</div>
+                        <div class="emoji-tab" data-cat="objects">💡</div>
+                        <div class="emoji-tab" data-cat="symbols">❤️</div>
+                    </div>
+                    <div class="emoji-grid" id="emojiGrid"></div>
+                </div>
             </div>
         </div>
 
@@ -234,6 +244,91 @@
         const sb = window.supabase.createClient('https://fqbxhkcdefwsuefifygk.supabase.co', 'sb_publishable_jC8Ntyx8QD2FHkP8Bqa63A_sLljd1Fj');
         let currentUser, activeChat, presenceChannel, messageChannel, onlineUsers = {}, lastMsgs = {};
         let mediaRecorder, audioChunks = [], recInterval, recSeconds = 0, audioBlob = null;
+        let recentEmojis = JSON.parse(localStorage.getItem('recentEmojis') || '[]');
+
+        // ==================== EMOJIS ====================
+        const emojiCategories = {
+            recent: () => recentEmojis.slice(0, 30),
+            smileys: ['😀','😃','😄','😁','😅','😂','🤣','😊','😇','🙂','😉','😌','😍','🥰','😘','😗','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','😮','🤥','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🥴','😵','🤯','🥳','🥺','😢','😭','😤','😠','😡','🤬','💀','☠️','💩','🤡','👹','👺','👻','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾'],
+            people: ['👋','🤚','✋','🖐️','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦵','🦶','👂','👃','🧠','🦷','🦴','👀','👁️','👅','👄','👶','🧒','👦','👧','🧑','👱','👨','🧔','👩','🧓','👴','👵','🙍','🙎','🙅','🙆','💁','🙋','🧏','🙇','🤦','🤷','👮','🕵️','💂','👷','🤴','👸','👳','👲','🧕','🤵','👰','🤰','🤱','👼','🎅','🤶','🦸','🦹','🧙','🧚','🧛','🧜','🧝','🧞','🧟'],
+            animals: ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🙈','🙉','🙊','🐒','🐔','🐧','🐦','🐤','🐣','🐥','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷️','🦂','🐢','🐍','🦎','🦖','🦕','🐙','🦑','🦐','🐠','🐟','🐡','🦈','🐳','🐋','🐊','🐆','🐅','🐃','🐂','🐄','🦌','🐪','🐫','🦒','🐘','🦏','🦛','🐁','🐀','🐿️','🦔','🐾','🐉','🐲'],
+            food: ['🍏','🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🍆','🥑','🥦','🥬','🥒','🌶️','🫑','🌽','🥕','🧄','🧅','🥔','🍠','🥐','🍞','🥖','🥨','🧀','🥚','🍳','🧈','🥞','🧇','🥓','🥩','🍗','🍖','🌭','🍔','🍟','🍕','🫓','🥪','🥙','🧆','🌮','🌯','🫔','🥗','🥘','🫕','🥫','🍝','🍜','🍲','🍛','🍣','🍱','🥟','🦪','🍤','🍙','🍚','🍘','🍥','🥠','🍢','🍡','🍧','🍨','🍦','🥧','🧁','🍰','🎂','🍮','🍭','🍬','🍫','🍿','🍩','🍪','🌰','🥜','🍯','🥛','🍼','☕','🍵','🧃','🥤','🍶','🍺','🍻','🥂','🍷','🥃','🍸','🍹','🧉','🍾','🧊'],
+            travel: ['🚗','🚕','🚙','🚌','🚎','🏎️','🚓','🚑','🚒','🚐','🛻','🚚','🚛','🚜','🏍️','🛵','🚲','🛴','🚨','🚔','🚍','🚘','🚖','🚡','🚠','🚟','🚃','🚋','🚞','🚝','🚄','🚅','🚈','🚂','🚆','🚇','🚊','🚉','✈️','🛫','🛬','💺','🚀','🛸','🚁','🛶','⛵','🚤','🛥️','🛳️','⛴️','🚢','⚓','🚧','⛽','🚏','🚦','🚥','🗺️','🗿','🗽','🗼','🏰','🏯','🏟️','🎡','🎢','🎠','🌋','🏔️','⛰️','🏕️','🏖️','🏜️','🏝️','🏞️'],
+            objects: ['⌚','📱','💻','⌨️','🖥️','🖨️','🖱️','🖲️','🕹️','💽','💾','💿','📀','📼','📷','📸','📹','🎥','📽️','🎞️','📞','☎️','📟','📠','📺','📻','🎙️','🎚️','🎛️','🧭','⏱️','⏲️','⏰','🕰️','⌛','📡','🔋','🔌','💡','🔦','🕯️','🧯','💸','💵','💴','💶','💷','💰','💳','💎','⚖️','🔧','🔨','⚒️','🛠️','⛏️','🔩','⚙️','🗜️','⚗️','🔬','🔭','💉','💊','🩹','🩺','🚪','🛏️','🛋️','🚿','🛁','🚽','🧻','🧸','🪆','🧷','🧹','🧴','🧼','🪥','🧽','🧢','👒','🎩','🎓','👑','💍','👝','👛','👜','💼','🎒','🧳','👓','🕶️','🥽','🌂','☂️','💄','💋','👠','👡','👢','👞','👟','🧦','🧤','🧣','👗','👘','👙'],
+            symbols: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','💌','💋','💯','🔥','⭐','🌟','✨','💫','🎉','🎊','🎈','🎀','🎁','🏆','🥇','🥈','🥉','🏅','🎖️','🏵️','🎗️','🎫','🎟️','🎪','🎭','🎨','🎬','🎤','🎧','🎼','🎹','🥁','🎷','🎺','🎸','🪕','🎻','🎲','♟️','🎯','🎳','🎮','🕹️','✅','❌','❓','❗','➕','➖','➗','✖️','🔶','🔷','🔴','🔵','🟢','🟡','🟠','🟣','⚫','⚪','🟤']
+        };
+
+        function renderEmojiGrid(category) {
+            const grid = document.getElementById('emojiGrid');
+            const emojis = typeof emojiCategories[category] === 'function' ? 
+                emojiCategories[category]() : emojiCategories[category];
+            
+            if (emojis.length === 0) {
+                grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#667781;">Use emojis para adicionar aos recentes</div>';
+                return;
+            }
+            
+            grid.innerHTML = emojis.map(e => 
+                `<div class="emoji-cell" onclick="insertEmoji('${e}')" title="${e}">${e}</div>`
+            ).join('');
+        }
+
+        function toggleEmojiPicker() {
+            const picker = document.getElementById('emojiPicker');
+            const btn = document.getElementById('emojiBtn');
+            
+            if (picker.classList.contains('show')) {
+                picker.classList.remove('show');
+                btn.style.color = '#54656f';
+            } else {
+                picker.classList.add('show');
+                btn.style.color = '#00a884';
+                const activeTab = document.querySelector('.emoji-tab.active');
+                const cat = activeTab ? activeTab.dataset.cat : 'smileys';
+                renderEmojiGrid(cat);
+                document.getElementById('msgInput').focus();
+            }
+        }
+
+        function switchEmojiTab(tab) {
+            document.querySelectorAll('.emoji-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            renderEmojiGrid(tab.dataset.cat);
+        }
+
+        function insertEmoji(emoji) {
+            const input = document.getElementById('msgInput');
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            const before = input.value.substring(0, start);
+            const after = input.value.substring(end);
+            
+            input.value = before + emoji + after;
+            const newPos = start + emoji.length;
+            input.focus();
+            input.selectionStart = input.selectionEnd = newPos;
+            
+            // Adicionar aos recentes
+            recentEmojis = [emoji, ...recentEmojis.filter(e => e !== emoji)].slice(0, 30);
+            localStorage.setItem('recentEmojis', JSON.stringify(recentEmojis));
+        }
+
+        // Eventos das tabs de emoji
+        document.getElementById('emojiTabs').addEventListener('click', function(e) {
+            if (e.target.classList.contains('emoji-tab')) {
+                switchEmojiTab(e.target);
+            }
+        });
+
+        // Fechar emoji picker ao clicar fora
+        document.addEventListener('click', function(e) {
+            const picker = document.getElementById('emojiPicker');
+            const btn = document.getElementById('emojiBtn');
+            if (picker && btn && !picker.contains(e.target) && e.target !== btn) {
+                picker.classList.remove('show');
+                btn.style.color = '#54656f';
+            }
+        });
 
         // ==================== LOGIN ====================
         function entrar() {
@@ -266,7 +361,7 @@
         // ==================== PRESENÇA ====================
         function connectPresence() {
             if (presenceChannel) sb.removeChannel(presenceChannel);
-            presenceChannel = sb.channel('presence_v9', { config: { broadcast: { self: true } } });
+            presenceChannel = sb.channel('presence_v10', { config: { broadcast: { self: true } } });
             presenceChannel.on('broadcast', { event: 'user_online' }, p => {
                 if (p.payload.id !== currentUser?.id) { onlineUsers[p.payload.id] = p.payload; renderContacts(); }
             }).on('broadcast', { event: 'request_users' }, () => { if (currentUser) announcePresence(); })
@@ -304,131 +399,68 @@
             document.getElementById('contactList').innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div><div class="empty-title">WhatsApp Web</div><div class="empty-text">Clique em atualizar</div><button class="empty-btn" onclick="refreshContacts()">🔄 Buscar Contatos</button></div>';
         }
 
-        // ==================== EMOJIS ====================
-        function toggleEmojiPicker() {
-            alert('😀 Emojis disponíveis! Use os emojis do teclado: Windows + . (ponto) ou Command + Control + Espaço no Mac');
-        }
-
         // ==================== ÁUDIO ====================
         async function startRecording() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 mediaRecorder = new MediaRecorder(stream);
                 audioChunks = []; recSeconds = 0;
-                
                 mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
                 mediaRecorder.onstop = () => {
                     audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                     if (recSeconds >= 1) sendAudioMsg();
                     stream.getTracks().forEach(t => t.stop());
                 };
-                
                 mediaRecorder.start();
                 document.getElementById('recordingOverlay').classList.add('show');
                 document.getElementById('recTimer').textContent = '00:00';
-                
                 recInterval = setInterval(() => {
                     recSeconds++;
                     const m = Math.floor(recSeconds / 60).toString().padStart(2, '0');
                     const s = (recSeconds % 60).toString().padStart(2, '0');
                     document.getElementById('recTimer').textContent = m + ':' + s;
                 }, 1000);
-            } catch(e) {
-                alert('⚠️ Permita o acesso ao microfone nas configurações do navegador!');
-            }
+            } catch(e) { alert('⚠️ Permita o acesso ao microfone!'); }
         }
-
         function stopRecording() {
-            if (mediaRecorder && mediaRecorder.state === 'recording') {
-                mediaRecorder.stop();
-            }
+            if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
             clearInterval(recInterval);
             document.getElementById('recordingOverlay').classList.remove('show');
         }
-
-        function cancelAudio() {
-            stopRecording();
-            audioBlob = null;
-            audioChunks = [];
-        }
-
+        function cancelAudio() { stopRecording(); audioBlob = null; audioChunks = []; }
         function sendAudioMsg() {
             if (!audioBlob || !activeChat) return;
-            
             const reader = new FileReader();
             reader.onload = function() {
-                const msg = {
-                    id: 'msg_' + Date.now(),
-                    from: currentUser.id,
-                    fromName: currentUser.name,
-                    to: activeChat.id,
-                    type: 'audio',
-                    audio: reader.result,
-                    duration: recSeconds,
-                    timestamp: Date.now()
-                };
-                
-                displayAudioMsg(msg, true);
-                saveMsg(msg);
+                const msg = { id: 'msg_' + Date.now(), from: currentUser.id, fromName: currentUser.name, to: activeChat.id, type: 'audio', audio: reader.result, duration: recSeconds, timestamp: Date.now() };
+                displayAudioMsg(msg, true); saveMsg(msg);
                 lastMsgs[activeChat.id] = { text: '🎤 Áudio ' + formatDuration(recSeconds), timestamp: msg.timestamp };
-                
-                if (messageChannel) {
-                    messageChannel.send({ type: 'broadcast', event: 'msg', payload: msg });
-                }
+                if (messageChannel) messageChannel.send({ type: 'broadcast', event: 'msg', payload: msg });
                 renderContacts();
             };
             reader.readAsDataURL(audioBlob);
         }
-
         function displayAudioMsg(msg, sent) {
-            const container = document.getElementById('messagesArea');
-            const div = document.createElement('div');
-            div.className = 'msg ' + (sent ? 'sent' : 'received');
-            
+            const c = document.getElementById('messagesArea'), d = document.createElement('div');
+            d.className = 'msg ' + (sent ? 'sent' : 'received');
             const dur = formatDuration(msg.duration);
             const bars = Array.from({length: 15}, () => Math.floor(Math.random() * 25) + 5);
-            
-            div.innerHTML = `
-                ${!sent ? '<div class="msg-sender">~' + esc(msg.fromName) + '</div>' : ''}
-                <div class="msg-bubble">
-                    <div class="audio-msg">
-                        <button class="audio-play-btn" onclick="toggleAudio(this, '${msg.audio.replace(/'/g, "\\'")}')">▶</button>
-                        <div class="audio-wave-container">
-                            <div class="audio-wave">${bars.map(h => `<div class="audio-bar" style="height:${h}px;"></div>`).join('')}</div>
-                            <span class="audio-duration">${dur}</span>
-                        </div>
-                    </div>
-                    <span class="msg-time">${formatTime(msg.timestamp)}</span>
-                </div>
-            `;
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
+            d.innerHTML = `${!sent?'<div class="msg-sender">~'+esc(msg.fromName)+'</div>':''}<div class="msg-bubble"><div class="audio-msg"><button class="audio-play-btn" onclick="toggleAudio(this,'${msg.audio.replace(/'/g,"\\'")}')">▶</button><div class="audio-wave-container"><div class="audio-wave">${bars.map(h=>`<div class="audio-bar" style="height:${h}px;"></div>`).join('')}</div><span class="audio-duration">${dur}</span></div></div><span class="msg-time">${formatTime(msg.timestamp)}</span></div>`;
+            c.appendChild(d); c.scrollTop = c.scrollHeight;
         }
-
         function toggleAudio(btn, audioData) {
             const existingAudio = document.querySelector('audio');
             if (existingAudio) { existingAudio.pause(); existingAudio.remove(); }
-            
             if (btn.dataset.playing === 'true') {
-                btn.textContent = '▶';
-                btn.dataset.playing = 'false';
+                btn.textContent = '▶'; btn.dataset.playing = 'false';
                 document.querySelectorAll('.audio-bar').forEach(b => b.classList.remove('playing'));
                 return;
             }
-            
             const audio = new Audio(audioData);
-            btn.textContent = '⏸';
-            btn.dataset.playing = 'true';
-            
+            btn.textContent = '⏸'; btn.dataset.playing = 'true';
             const bars = btn.closest('.audio-msg').querySelectorAll('.audio-bar');
             bars.forEach(b => b.classList.add('playing'));
-            
-            audio.onended = () => {
-                btn.textContent = '▶';
-                btn.dataset.playing = 'false';
-                bars.forEach(b => b.classList.remove('playing'));
-            };
-            
+            audio.onended = () => { btn.textContent = '▶'; btn.dataset.playing = 'false'; bars.forEach(b => b.classList.remove('playing')); };
             audio.play();
         }
 
@@ -437,9 +469,7 @@
             if (messageChannel) sb.removeChannel(messageChannel);
             activeChat = { id: uid, name: uname, color: ucolor };
             document.getElementById('welcomeScreen').style.display = 'none';
-            document.getElementById('chatHeader').style.display = 'flex';
-            document.getElementById('messagesArea').style.display = 'block';
-            document.getElementById('inputBar').style.display = 'flex';
+            ['chatHeader','messagesArea','inputBar'].forEach(id => document.getElementById(id).style.display = 'flex');
             document.getElementById('chatName').textContent = uname;
             document.getElementById('chatAvatar').textContent = getInitials(uname);
             document.getElementById('chatAvatar').style.background = ucolor || 'linear-gradient(135deg,#667eea,#764ba2)';
@@ -448,19 +478,15 @@
             if (window.innerWidth <= 768) document.getElementById('mainChat').classList.add('active');
             renderContacts();
         }
-
         function closeChat() {
             if (messageChannel) sb.removeChannel(messageChannel);
             activeChat = null;
             document.getElementById('welcomeScreen').style.display = 'flex';
-            document.getElementById('chatHeader').style.display = 'none';
-            document.getElementById('messagesArea').style.display = 'none';
-            document.getElementById('inputBar').style.display = 'none';
+            ['chatHeader','messagesArea','inputBar'].forEach(id => document.getElementById(id).style.display = 'none');
             document.getElementById('messagesArea').innerHTML = '';
             if (window.innerWidth <= 768) document.getElementById('mainChat').classList.remove('active');
             renderContacts();
         }
-
         function createMsgChannel(uid) {
             messageChannel = sb.channel('chat_' + [currentUser.id, uid].sort().join('_'));
             messageChannel.on('broadcast', { event: 'msg' }, p => {
@@ -474,38 +500,28 @@
                 renderContacts();
             }).subscribe();
         }
-
         function sendMsg() {
             const input = document.getElementById('msgInput');
             const text = input.value.trim();
             if (!text || !activeChat) return;
-            
             const msg = { id: 'msg_' + Date.now(), from: currentUser.id, fromName: currentUser.name, to: activeChat.id, type: 'text', text, timestamp: Date.now() };
-            displayMsg(msg, true);
-            saveMsg(msg);
+            displayMsg(msg, true); saveMsg(msg);
             lastMsgs[activeChat.id] = { text, timestamp: msg.timestamp };
-            input.value = '';
-            input.focus();
-            
-            if (messageChannel) {
-                messageChannel.send({ type: 'broadcast', event: 'msg', payload: msg });
-            }
+            input.value = ''; input.focus();
+            if (messageChannel) messageChannel.send({ type: 'broadcast', event: 'msg', payload: msg });
             renderContacts();
         }
-
         function displayMsg(msg, sent) {
             const c = document.getElementById('messagesArea'), d = document.createElement('div');
             d.className = 'msg ' + (sent ? 'sent' : 'received');
             d.innerHTML = `${!sent?'<div class="msg-sender">~'+esc(msg.fromName)+'</div>':''}<div class="msg-bubble"><div class="msg-text">${esc(msg.text)}</div><span class="msg-time">${formatTime(msg.timestamp)}</span></div>`;
             c.appendChild(d); c.scrollTop = c.scrollHeight;
         }
-
         function saveMsg(msg) {
             const k = 'wp_msgs_' + [msg.from, msg.to].sort().join('_');
             let ms = JSON.parse(localStorage.getItem(k) || '[]');
             if (!ms.find(m => m.id === msg.id)) { ms.push(msg); if (ms.length > 300) ms = ms.slice(-300); localStorage.setItem(k, JSON.stringify(ms)); }
         }
-
         function loadMsgs() {
             if (!activeChat) return;
             const k = 'wp_msgs_' + [currentUser.id, activeChat.id].sort().join('_');
