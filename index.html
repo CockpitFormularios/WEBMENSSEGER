@@ -3,53 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WhatsApp P2P</title>
+    <title>Chat P2P - WhatsApp Style</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a1014;
+            background: #111b21;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        .app {
+        .container {
             width: 100%;
-            max-width: 430px;
+            max-width: 450px;
             height: 100vh;
-            max-height: 900px;
             background: #111b21;
             display: flex;
             flex-direction: column;
             color: white;
         }
 
-        .login {
+        /* Tela de Login */
+        .login-screen {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100%;
-            padding: 30px;
-            gap: 20px;
+            padding: 40px;
+            gap: 25px;
         }
 
-        .login input {
+        .login-screen h1 {
+            font-size: 32px;
+            font-weight: 300;
+        }
+
+        .login-screen .emoji {
+            font-size: 60px;
+        }
+
+        .input-wrapper {
             width: 100%;
-            padding: 15px;
+        }
+
+        .input-wrapper label {
+            display: block;
+            color: #8696a0;
+            font-size: 13px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 15px 20px;
             border: none;
             border-radius: 12px;
             background: #2a3942;
             color: white;
             font-size: 16px;
             outline: none;
+            transition: 0.3s;
         }
 
-        .login button {
+        .input-wrapper input:focus {
+            background: #354450;
+        }
+
+        .btn-entrar {
             width: 100%;
             padding: 15px;
             border: none;
@@ -57,11 +88,27 @@
             background: #00a884;
             color: white;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .chat {
+        .btn-entrar:hover {
+            background: #008f72;
+            transform: translateY(-2px);
+        }
+
+        .aviso {
+            color: #8696a0;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        /* Tela do Chat */
+        .chat-screen {
             display: none;
             flex-direction: column;
             height: 100%;
@@ -72,100 +119,85 @@
             padding: 15px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
-        .messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            background: #0b141a;
-        }
-
-        .msg {
-            margin-bottom: 5px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .msg.sent { align-items: flex-end; }
-        .msg.received { align-items: flex-start; }
-
-        .msg-bubble {
-            max-width: 75%;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            word-wrap: break-word;
-        }
-
-        .msg.sent .msg-bubble {
-            background: #005c4b;
-            border-radius: 8px 0 8px 8px;
-        }
-
-        .msg.received .msg-bubble {
-            background: #202c33;
-            border-radius: 0 8px 8px 8px;
-        }
-
-        .msg-sender {
-            font-size: 12px;
-            color: #06cf9c;
-            margin-bottom: 2px;
-        }
-
-        .msg-time {
-            font-size: 11px;
-            color: #8696a0;
-            margin-top: 2px;
-            text-align: right;
-        }
-
-        .input-area {
-            background: #202c33;
-            padding: 10px 15px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .input-area input {
-            flex: 1;
-            padding: 12px;
+        .btn-voltar {
+            background: none;
             border: none;
-            border-radius: 24px;
-            background: #2a3942;
             color: white;
-            outline: none;
+            font-size: 24px;
+            cursor: pointer;
+            display: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
         }
 
-        .input-area button {
-            width: 45px;
-            height: 45px;
+        .btn-voltar:hover {
+            background: #2a3942;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             background: #00a884;
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 18px;
         }
 
-        .users {
+        .header-info {
+            flex: 1;
+        }
+
+        .header-nome {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .header-status {
+            font-size: 12px;
+            color: #8696a0;
+        }
+
+        .btn-sair {
+            background: none;
+            border: none;
+            color: #8696a0;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 8px;
+        }
+
+        .btn-sair:hover {
+            color: white;
+        }
+
+        /* Lista de usuários */
+        .users-list {
             flex: 1;
             overflow-y: auto;
-            padding: 10px;
         }
 
         .user-item {
-            padding: 15px;
+            padding: 15px 20px;
             display: flex;
             align-items: center;
             gap: 15px;
             cursor: pointer;
             border-bottom: 1px solid #202c33;
+            transition: 0.2s;
         }
 
-        .user-item:hover { background: #202c33; }
+        .user-item:hover {
+            background: #202c33;
+        }
 
         .user-avatar {
             width: 50px;
@@ -179,289 +211,577 @@
             font-weight: bold;
         }
 
-        .back-btn {
-            background: none;
+        .user-name {
+            font-size: 17px;
+        }
+
+        .user-status-dot {
+            width: 10px;
+            height: 10px;
+            background: #00a884;
+            border-radius: 50%;
+            margin-left: auto;
+        }
+
+        .empty-users {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #8696a0;
+            gap: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Área de mensagens */
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #0b141a;
+            display: none;
+        }
+
+        .message {
+            margin-bottom: 5px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message.sent {
+            align-items: flex-end;
+        }
+
+        .message.received {
+            align-items: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14.2px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .message.sent .message-bubble {
+            background: #005c4b;
+            border-radius: 8px 0 8px 8px;
+        }
+
+        .message.received .message-bubble {
+            background: #202c33;
+            border-radius: 0 8px 8px 8px;
+        }
+
+        .message-sender {
+            font-size: 12px;
+            color: #06cf9c;
+            margin-bottom: 3px;
+            font-weight: 600;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #8696a0;
+            margin-top: 3px;
+            text-align: right;
+        }
+
+        /* Input de mensagem */
+        .input-area {
+            background: #202c33;
+            padding: 10px 15px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 24px;
+            background: #2a3942;
+            color: white;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .input-area input::placeholder {
+            color: #8696a0;
+        }
+
+        .btn-enviar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #00a884;
             border: none;
             color: white;
             font-size: 20px;
             cursor: pointer;
-            display: none;
+            transition: 0.3s;
+            flex-shrink: 0;
+        }
+
+        .btn-enviar:hover {
+            background: #008f72;
+            transform: scale(1.05);
+        }
+
+        .btn-enviar:active {
+            transform: scale(0.95);
         }
     </style>
 </head>
 <body>
-    <div class="app">
-        <!-- Login -->
-        <div id="loginScreen" class="login">
-            <h2>💬 WhatsApp P2P</h2>
-            <input type="text" id="nameInput" placeholder="Seu nome" maxlength="20">
-            <button onclick="login()">Entrar</button>
-            <p style="color: #8696a0; font-size: 12px;">Mensagens diretas • Sem armazenamento</p>
+    <div class="container">
+        <!-- LOGIN -->
+        <div id="telaLogin" class="login-screen">
+            <div class="emoji">💬</div>
+            <h1>Chat P2P</h1>
+            <div class="input-wrapper">
+                <label>Seu nome</label>
+                <input type="text" id="nomeInput" placeholder="Digite seu nome..." maxlength="20" autocomplete="off">
+            </div>
+            <button class="btn-entrar" onclick="entrar()">Entrar no Chat</button>
+            <p class="aviso">🔒 Mensagens diretas • Sem armazenamento no servidor</p>
         </div>
 
-        <!-- Chat -->
-        <div id="chatScreen" class="chat">
+        <!-- CHAT -->
+        <div id="telaChat" class="chat-screen">
             <div class="header">
-                <button class="back-btn" id="backBtn" onclick="goBack()">←</button>
-                <div class="user-avatar" id="chatAvatar" style="width:40px;height:40px;font-size:16px;">👤</div>
-                <div>
-                    <div id="chatName" style="font-weight:500;">Conversas</div>
-                    <div id="chatStatus" style="font-size:12px;color:#8696a0;">online</div>
+                <button class="btn-voltar" id="btnVoltar" onclick="voltar()">←</button>
+                <div class="avatar" id="avatarHeader">👤</div>
+                <div class="header-info">
+                    <div class="header-nome" id="nomeHeader">Conversas</div>
+                    <div class="header-status" id="statusHeader">online</div>
                 </div>
-                <button onclick="logout()" style="margin-left:auto;background:none;border:none;color:#8696a0;cursor:pointer;">Sair</button>
+                <button class="btn-sair" onclick="sair()">Sair</button>
             </div>
 
-            <div id="usersList" class="users"></div>
-            <div id="messagesContainer" class="messages" style="display:none;"></div>
-
-            <div id="inputArea" class="input-area" style="display:none;">
-                <input type="text" id="messageInput" placeholder="Mensagem" maxlength="1000">
-                <button onclick="sendMessage()">➤</button>
+            <div id="listaUsuarios" class="users-list"></div>
+            <div id="areaMensagens" class="messages-area"></div>
+            <div id="areaInput" class="input-area">
+                <input type="text" id="inputMensagem" placeholder="Mensagem" maxlength="1000" autocomplete="off">
+                <button class="btn-enviar" onclick="enviarMensagem()">➤</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Configuração
+        // CONFIGURAÇÃO SUPABASE
         const SUPABASE_URL = 'https://fqbxhkcdefwsuefifygk.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_jC8Ntyx8QD2FHkP8Bqa63A_sLljd1Fj';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let currentUser = null;
-        let currentChat = null;
-        let messageChannel = null;
-        let onlineUsers = new Map();
+        // ESTADO
+        let usuarioAtual = null;
+        let chatAtual = null;
+        let canalMensagens = null;
+        let usuariosOnline = new Map();
+        let canalPresenca = null;
 
-        // Login
-        async function login() {
-            const name = document.getElementById('nameInput').value.trim();
-            if (!name || name.length < 2) return alert('Digite um nome (mínimo 2 caracteres)');
+        // ============ ENTRAR ============
+        async function entrar() {
+            const nome = document.getElementById('nomeInput').value.trim();
             
-            currentUser = {
-                id: 'user_' + btoa(name).substring(0, 20),
-                name: name
+            if (!nome || nome.length < 2) {
+                alert('Digite um nome com pelo menos 2 caracteres');
+                return;
+            }
+
+            // Criar usuário
+            usuarioAtual = {
+                id: 'user_' + btoa(nome).substring(0, 20).replace(/[^a-zA-Z0-9]/g, ''),
+                nome: nome
             };
+
+            // Salvar no navegador
+            localStorage.setItem('chat_usuario', JSON.stringify(usuarioAtual));
+
+            // Mostrar tela do chat
+            document.getElementById('telaLogin').style.display = 'none';
+            document.getElementById('telaChat').style.display = 'flex';
             
-            localStorage.setItem('chat_user', JSON.stringify(currentUser));
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('chatScreen').style.display = 'flex';
-            document.getElementById('chatName').textContent = 'Conversas';
+            // Configurar header
+            document.getElementById('nomeHeader').textContent = 'Conversas';
+            document.getElementById('statusHeader').textContent = 'online';
+            document.getElementById('avatarHeader').textContent = '👤';
+            document.getElementById('btnVoltar').style.display = 'none';
             
-            await announcePresence();
-            subscribePresence();
-            requestUsers();
+            // Mostrar lista de usuários
+            mostrarListaUsuarios();
+            
+            // Anunciar presença
+            await anunciarPresenca();
+            
+            // Escutar presença de outros
+            escutarPresenca();
+            
+            // Solicitar lista de usuários
+            solicitarUsuarios();
         }
 
-        function logout() {
-            currentUser = null;
-            currentChat = null;
-            if (messageChannel) supabase.removeChannel(messageChannel);
-            localStorage.removeItem('chat_user');
-            document.getElementById('loginScreen').style.display = 'flex';
-            document.getElementById('chatScreen').style.display = 'none';
-            showUsers();
+        // ============ SAIR ============
+        function sair() {
+            // Remover canal de mensagens
+            if (canalMensagens) {
+                supabase.removeChannel(canalMensagens);
+                canalMensagens = null;
+            }
+            
+            // Remover canal de presença
+            if (canalPresenca) {
+                supabase.removeChannel(canalPresenca);
+                canalPresenca = null;
+            }
+            
+            usuarioAtual = null;
+            chatAtual = null;
+            usuariosOnline.clear();
+            localStorage.removeItem('chat_usuario');
+            
+            document.getElementById('telaLogin').style.display = 'flex';
+            document.getElementById('telaChat').style.display = 'none';
+            document.getElementById('nomeInput').value = '';
         }
 
-        // Presença via Broadcast
-        async function announcePresence() {
+        // ============ PRESENÇA ============
+        async function anunciarPresenca() {
+            if (!usuarioAtual) return;
+            
             try {
-                const ch = supabase.channel('presence');
-                await ch.subscribe();
-                await ch.send({
-                    type: 'broadcast',
-                    event: 'user_online',
-                    payload: { user_id: currentUser.id, name: currentUser.name }
+                const canal = supabase.channel('presenca_global');
+                
+                await new Promise((resolve, reject) => {
+                    canal.subscribe((status) => {
+                        if (status === 'SUBSCRIBED') {
+                            canal.send({
+                                type: 'broadcast',
+                                event: 'presenca',
+                                payload: {
+                                    user_id: usuarioAtual.id,
+                                    nome: usuarioAtual.nome,
+                                    online: true,
+                                    timestamp: Date.now()
+                                }
+                            }).then(() => {
+                                setTimeout(() => {
+                                    supabase.removeChannel(canal);
+                                    resolve();
+                                }, 200);
+                            });
+                        }
+                    });
                 });
-                await new Promise(r => setTimeout(r, 100));
-                supabase.removeChannel(ch);
-            } catch(e) {
-                console.log('Presença via broadcast:', e);
+            } catch (erro) {
+                console.log('Erro ao anunciar presença:', erro);
             }
         }
 
-        function subscribePresence() {
-            const ch = supabase.channel('presence');
-            ch.on('broadcast', { event: 'user_online' }, (payload) => {
-                if (payload.payload.user_id !== currentUser?.id) {
-                    onlineUsers.set(payload.payload.user_id, payload.payload);
-                    if (!currentChat) renderUsers();
-                }
-            }).on('broadcast', { event: 'request_users' }, async () => {
-                await announcePresence();
-            }).subscribe();
+        function escutarPresenca() {
+            if (canalPresenca) {
+                supabase.removeChannel(canalPresenca);
+            }
+            
+            canalPresenca = supabase.channel('presenca_global');
+            
+            canalPresenca
+                .on('broadcast', { event: 'presenca' }, (payload) => {
+                    const dados = payload.payload;
+                    
+                    if (dados.user_id === usuarioAtual?.id) return;
+                    
+                    if (dados.online) {
+                        usuariosOnline.set(dados.user_id, dados);
+                    } else {
+                        usuariosOnline.delete(dados.user_id);
+                    }
+                    
+                    // Atualizar lista se estiver vendo usuários
+                    if (!chatAtual) {
+                        renderizarUsuarios();
+                    }
+                })
+                .on('broadcast', { event: 'solicitar_usuarios' }, async () => {
+                    // Responder com minha presença
+                    await anunciarPresenca();
+                })
+                .subscribe();
         }
 
-        async function requestUsers() {
+        async function solicitarUsuarios() {
             try {
-                const ch = supabase.channel('presence');
-                await ch.subscribe();
-                await ch.send({
-                    type: 'broadcast',
-                    event: 'request_users',
-                    payload: { user_id: currentUser.id }
+                const canal = supabase.channel('presenca_global');
+                
+                await new Promise((resolve) => {
+                    canal.subscribe(async (status) => {
+                        if (status === 'SUBSCRIBED') {
+                            await canal.send({
+                                type: 'broadcast',
+                                event: 'solicitar_usuarios',
+                                payload: { user_id: usuarioAtual.id }
+                            });
+                            
+                            // Aguardar respostas
+                            setTimeout(() => {
+                                supabase.removeChannel(canal);
+                                resolve();
+                            }, 1000);
+                        }
+                    });
                 });
-                await new Promise(r => setTimeout(r, 800));
-                supabase.removeChannel(ch);
-                renderUsers();
-            } catch(e) {
-                console.log('Request users:', e);
+                
+                renderizarUsuarios();
+            } catch (erro) {
+                console.log('Erro ao solicitar usuários:', erro);
+                renderizarUsuarios();
             }
         }
 
-        function renderUsers() {
-            const container = document.getElementById('usersList');
-            const users = Array.from(onlineUsers.values()).filter(u => u.user_id !== currentUser?.id);
+        function renderizarUsuarios() {
+            const container = document.getElementById('listaUsuarios');
+            const usuarios = Array.from(usuariosOnline.values())
+                .filter(u => u.user_id !== usuarioAtual?.id);
             
-            if (users.length === 0) {
-                container.innerHTML = '<div style="text-align:center;padding:40px;color:#8696a0;">Nenhum usuário online</div>';
+            if (usuarios.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-users">
+                        <div style="font-size:50px;">👥</div>
+                        <div>Nenhum usuário online</div>
+                        <div style="font-size:13px;">Abra em outro navegador para testar</div>
+                        <button class="btn-entrar" style="width:auto;padding:10px 30px;font-size:14px;margin-top:10px;" onclick="solicitarUsuarios()">
+                            🔄 Atualizar Lista
+                        </button>
+                    </div>
+                `;
                 return;
             }
             
-            container.innerHTML = users.map(u => `
-                <div class="user-item" onclick="openChat('${u.user_id}', '${u.name}')">
-                    <div class="user-avatar">${u.name.substring(0,2).toUpperCase()}</div>
-                    <div style="color:white;">${u.name}</div>
-                    <div style="margin-left:auto;color:#00a884;font-size:12px;">online</div>
+            container.innerHTML = usuarios.map(u => `
+                <div class="user-item" onclick="abrirChat('${u.user_id}', '${u.nome}')">
+                    <div class="user-avatar">${u.nome.substring(0, 2).toUpperCase()}</div>
+                    <div class="user-name">${u.nome}</div>
+                    <div class="user-status-dot"></div>
                 </div>
             `).join('');
         }
 
-        // Chat
-        function openChat(userId, userName) {
-            currentChat = { id: userId, name: userName };
-            document.getElementById('usersList').style.display = 'none';
-            document.getElementById('messagesContainer').style.display = 'block';
-            document.getElementById('inputArea').style.display = 'flex';
-            document.getElementById('backBtn').style.display = 'block';
-            document.getElementById('chatName').textContent = userName;
-            document.getElementById('chatAvatar').textContent = userName.substring(0,2).toUpperCase();
-            
-            document.getElementById('messagesContainer').innerHTML = '';
-            loadMessages();
-            subscribeMessages();
+        // ============ CHAT ============
+        function mostrarListaUsuarios() {
+            document.getElementById('listaUsuarios').style.display = 'block';
+            document.getElementById('areaMensagens').style.display = 'none';
+            document.getElementById('areaInput').style.display = 'none';
+            document.getElementById('btnVoltar').style.display = 'none';
+            document.getElementById('nomeHeader').textContent = 'Conversas';
+            document.getElementById('avatarHeader').textContent = '👤';
+            document.getElementById('statusHeader').textContent = 'online';
         }
 
-        function goBack() {
-            currentChat = null;
-            if (messageChannel) {
-                supabase.removeChannel(messageChannel);
-                messageChannel = null;
+        function mostrarChat() {
+            document.getElementById('listaUsuarios').style.display = 'none';
+            document.getElementById('areaMensagens').style.display = 'block';
+            document.getElementById('areaInput').style.display = 'flex';
+            document.getElementById('btnVoltar').style.display = 'flex';
+        }
+
+        function abrirChat(userId, nome) {
+            chatAtual = { id: userId, nome: nome };
+            
+            // Atualizar header
+            document.getElementById('nomeHeader').textContent = nome;
+            document.getElementById('avatarHeader').textContent = nome.substring(0, 2).toUpperCase();
+            document.getElementById('statusHeader').textContent = 'online';
+            
+            // Mostrar chat
+            mostrarChat();
+            
+            // Limpar mensagens
+            document.getElementById('areaMensagens').innerHTML = '';
+            
+            // Carregar mensagens locais
+            carregarMensagensLocais();
+            
+            // Inscrever no canal de mensagens
+            inscreverMensagens();
+        }
+
+        function voltar() {
+            // Remover canal de mensagens
+            if (canalMensagens) {
+                supabase.removeChannel(canalMensagens);
+                canalMensagens = null;
             }
-            showUsers();
-            renderUsers();
+            
+            chatAtual = null;
+            mostrarListaUsuarios();
+            renderizarUsuarios();
         }
 
-        function showUsers() {
-            document.getElementById('usersList').style.display = 'block';
-            document.getElementById('messagesContainer').style.display = 'none';
-            document.getElementById('inputArea').style.display = 'none';
-            document.getElementById('backBtn').style.display = 'none';
-            document.getElementById('chatName').textContent = 'Conversas';
-            document.getElementById('chatAvatar').textContent = '👤';
+        // ============ MENSAGENS ============
+        function inscreverMensagens() {
+            if (canalMensagens) {
+                supabase.removeChannel(canalMensagens);
+            }
+            
+            const nomeCanal = 'chat_' + [usuarioAtual.id, chatAtual.id].sort().join('_');
+            
+            canalMensagens = supabase.channel(nomeCanal);
+            
+            canalMensagens
+                .on('broadcast', { event: 'msg' }, (payload) => {
+                    const msg = payload.payload;
+                    
+                    // Verificar se é do chat atual
+                    if (chatAtual && (msg.from === chatAtual.id || msg.to === chatAtual.id)) {
+                        mostrarMensagem(msg, msg.from === usuarioAtual.id);
+                        salvarMensagem(msg);
+                    }
+                })
+                .subscribe();
         }
 
-        // Mensagens
-        function subscribeMessages() {
-            if (messageChannel) supabase.removeChannel(messageChannel);
+        async function enviarMensagem() {
+            const input = document.getElementById('inputMensagem');
+            const texto = input.value.trim();
             
-            const channelName = 'chat_' + [currentUser.id, currentChat.id].sort().join('_');
-            messageChannel = supabase.channel(channelName);
+            if (!texto || !chatAtual) return;
             
-            messageChannel.on('broadcast', { event: 'msg' }, (payload) => {
-                displayMessage(payload.payload, payload.payload.from === currentUser.id);
-                saveMessage(payload.payload);
-            }).subscribe();
-        }
-
-        async function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const text = input.value.trim();
-            if (!text || !currentChat) return;
-            
-            const msg = {
-                id: Date.now().toString(),
-                from: currentUser.id,
-                fromName: currentUser.name,
-                to: currentChat.id,
-                text: text,
-                time: Date.now()
+            const mensagem = {
+                id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                from: usuarioAtual.id,
+                fromNome: usuarioAtual.nome,
+                to: chatAtual.id,
+                texto: texto,
+                timestamp: Date.now()
             };
             
             try {
-                const channelName = 'chat_' + [currentUser.id, currentChat.id].sort().join('_');
-                await supabase.channel(channelName).send({
+                const nomeCanal = 'chat_' + [usuarioAtual.id, chatAtual.id].sort().join('_');
+                
+                await supabase.channel(nomeCanal).send({
                     type: 'broadcast',
                     event: 'msg',
-                    payload: msg
+                    payload: mensagem
                 });
                 
-                displayMessage(msg, true);
-                saveMessage(msg);
+                // Mostrar na tela
+                mostrarMensagem(mensagem, true);
+                
+                // Salvar localmente
+                salvarMensagem(mensagem);
+                
+                // Limpar input
                 input.value = '';
                 input.focus();
-            } catch(e) {
-                console.error('Erro ao enviar:', e);
+                
+            } catch (erro) {
+                console.error('Erro ao enviar:', erro);
+                alert('Erro ao enviar mensagem. Tente novamente.');
             }
         }
 
-        function displayMessage(msg, isSent) {
-            const container = document.getElementById('messagesContainer');
+        function mostrarMensagem(msg, enviada) {
+            const container = document.getElementById('areaMensagens');
             const div = document.createElement('div');
-            div.className = `msg ${isSent ? 'sent' : 'received'}`;
+            div.className = `message ${enviada ? 'sent' : 'received'}`;
             
-            const time = new Date(msg.time).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+            const hora = new Date(msg.timestamp).toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            // Escapar HTML para segurança
+            const textoEscapado = msg.texto
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
             
             div.innerHTML = `
-                ${!isSent ? `<div class="msg-sender">${msg.fromName}</div>` : ''}
-                <div class="msg-bubble">${msg.text}</div>
-                <div class="msg-time">${time}</div>
+                ${!enviada ? `<div class="message-sender">${msg.fromNome}</div>` : ''}
+                <div class="message-bubble">${textoEscapado}</div>
+                <div class="message-time">${hora}</div>
             `;
             
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
         }
 
-        function saveMessage(msg) {
-            const key = 'chat_' + [msg.from, msg.to].sort().join('_');
-            let msgs = JSON.parse(localStorage.getItem(key) || '[]');
-            if (!msgs.find(m => m.id === msg.id)) {
-                msgs.push(msg);
-                if (msgs.length > 100) msgs = msgs.slice(-100);
-                localStorage.setItem(key, JSON.stringify(msgs));
+        function salvarMensagem(msg) {
+            const chave = 'chat_msgs_' + [msg.from, msg.to].sort().join('_');
+            let mensagens = JSON.parse(localStorage.getItem(chave) || '[]');
+            
+            // Evitar duplicatas
+            if (!mensagens.find(m => m.id === msg.id)) {
+                mensagens.push(msg);
+                
+                // Limitar a 200 mensagens
+                if (mensagens.length > 200) {
+                    mensagens = mensagens.slice(-200);
+                }
+                
+                localStorage.setItem(chave, JSON.stringify(mensagens));
             }
         }
 
-        function loadMessages() {
-            const key = 'chat_' + [currentUser.id, currentChat.id].sort().join('_');
-            const msgs = JSON.parse(localStorage.getItem(key) || '[]');
-            msgs.forEach(msg => {
-                displayMessage(msg, msg.from === currentUser.id);
+        function carregarMensagensLocais() {
+            const chave = 'chat_msgs_' + [usuarioAtual.id, chatAtual.id].sort().join('_');
+            const mensagens = JSON.parse(localStorage.getItem(chave) || '[]');
+            
+            document.getElementById('areaMensagens').innerHTML = '';
+            
+            mensagens.forEach(msg => {
+                const enviada = msg.from === usuarioAtual.id;
+                mostrarMensagem(msg, enviada);
             });
         }
 
-        // Enter para enviar
-        document.getElementById('messageInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-
-        // Auto-login
-        window.addEventListener('load', () => {
-            const saved = localStorage.getItem('chat_user');
-            if (saved) {
-                currentUser = JSON.parse(saved);
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('chatScreen').style.display = 'flex';
-                document.getElementById('chatName').textContent = 'Conversas';
-                announcePresence();
-                subscribePresence();
-                requestUsers();
+        // ============ EVENTOS ============
+        // Enviar com Enter
+        document.getElementById('inputMensagem').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                enviarMensagem();
             }
         });
 
-        // Manter presença
+        // Manter presença a cada 30 segundos
         setInterval(() => {
-            if (currentUser) announcePresence();
-        }, 25000);
+            if (usuarioAtual) {
+                anunciarPresenca();
+            }
+        }, 30000);
+
+        // Restaurar sessão ao carregar
+        window.addEventListener('load', function() {
+            const dadosSalvos = localStorage.getItem('chat_usuario');
+            
+            if (dadosSalvos) {
+                try {
+                    usuarioAtual = JSON.parse(dadosSalvos);
+                    
+                    document.getElementById('telaLogin').style.display = 'none';
+                    document.getElementById('telaChat').style.display = 'flex';
+                    document.getElementById('nomeHeader').textContent = 'Conversas';
+                    document.getElementById('avatarHeader').textContent = '👤';
+                    document.getElementById('statusHeader').textContent = 'online';
+                    
+                    mostrarListaUsuarios();
+                    anunciarPresenca();
+                    escutarPresenca();
+                    solicitarUsuarios();
+                    
+                } catch (erro) {
+                    localStorage.removeItem('chat_usuario');
+                }
+            }
+        });
     </script>
 </body>
 </html>
