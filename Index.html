@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WhatsApp P2P - GitHub Pages</title>
+    <title>WhatsApp P2P - Mensagens Diretas</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -55,43 +55,11 @@
             }
         }
 
-        /* Splash Screen */
-        .splash {
-            background: var(--green-primary);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            gap: 20px;
-            animation: fadeIn 0.5s;
-        }
-
-        .splash-icon {
-            font-size: 80px;
-            animation: pulse 2s infinite;
-        }
-
-        .splash-title {
-            font-size: 32px;
-            font-weight: 300;
-            letter-spacing: 2px;
-        }
-
-        .splash-subtitle {
-            font-size: 14px;
-            opacity: 0.8;
-            text-align: center;
-            padding: 0 40px;
-        }
-
-        /* Login Screen */
         .login-screen {
             background: var(--bg-primary);
             color: var(--text-primary);
             padding: 40px 30px;
-            display: none;
+            display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -177,10 +145,8 @@
             font-size: 13px;
             text-align: center;
             display: none;
-            animation: shake 0.5s;
         }
 
-        /* Main Chat Screen */
         .main-screen {
             display: none;
             flex-direction: column;
@@ -289,7 +255,6 @@
             color: var(--text-primary);
         }
 
-        /* Users List */
         .users-list {
             flex: 1;
             overflow-y: auto;
@@ -313,7 +278,6 @@
             cursor: pointer;
             border-bottom: 1px solid rgba(255,255,255,0.03);
             transition: 0.2s;
-            animation: slideIn 0.3s;
         }
 
         .user-card:hover {
@@ -385,7 +349,6 @@
             font-size: 16px;
         }
 
-        /* Chat Area */
         .chat-area {
             flex: 1;
             display: none;
@@ -411,19 +374,6 @@
         .messages-container::-webkit-scrollbar-thumb {
             background: rgba(255,255,255,0.1);
             border-radius: 3px;
-        }
-
-        .date-separator {
-            text-align: center;
-            margin: 15px 0;
-        }
-
-        .date-separator span {
-            background: rgba(255,255,255,0.1);
-            color: var(--text-secondary);
-            padding: 5px 12px;
-            border-radius: 7px;
-            font-size: 12px;
         }
 
         .message-wrapper {
@@ -483,16 +433,6 @@
             color: rgba(255,255,255,0.5);
         }
 
-        .message-status {
-            font-size: 14px;
-            color: rgba(255,255,255,0.5);
-        }
-
-        .message-status.read {
-            color: #34b7f1;
-        }
-
-        /* Input Area */
         .input-area {
             background: var(--bg-secondary);
             padding: 10px 16px;
@@ -552,53 +492,15 @@
             cursor: not-allowed;
         }
 
-        /* Typing Indicator */
-        .typing-indicator {
-            display: none;
-            padding: 5px 20px;
-            color: var(--green-primary);
-            font-size: 12px;
-            font-style: italic;
-            background: var(--bg-chat);
-        }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideIn {
-            from { 
-                opacity: 0; 
-                transform: translateX(-20px); 
-            }
-            to { 
-                opacity: 1; 
-                transform: translateX(0); 
-            }
-        }
-
         @keyframes messageIn {
-            from { 
-                opacity: 0; 
-                transform: translateY(10px); 
+            from {
+                opacity: 0;
+                transform: translateY(10px);
             }
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
         }
 
         .loading-spinner {
@@ -615,7 +517,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Mobile optimization */
         @media (max-width: 430px) {
             .phone-frame {
                 max-height: 100vh;
@@ -631,18 +532,10 @@
 </head>
 <body>
     <div class="phone-frame">
-        <!-- Splash Screen -->
-        <div id="splashScreen" class="splash">
-            <div class="splash-icon">💬</div>
-            <div class="splash-title">WhatsApp P2P</div>
-            <div class="splash-subtitle">Mensagens diretas sem armazenamento no servidor</div>
-            <div class="loading-spinner"></div>
-        </div>
-
-        <!-- Login Screen -->
+        <!-- Tela de Login -->
         <div id="loginScreen" class="login-screen">
             <div class="login-header">
-                <h2>👋 Bem-vindo</h2>
+                <h2>💬 WhatsApp P2P</h2>
                 <p>Escolha um nome para começar a conversar</p>
             </div>
             
@@ -664,19 +557,17 @@
             </button>
             
             <p style="color: var(--text-secondary); font-size: 11px; text-align: center; margin-top: 20px;">
-                🔒 Suas mensagens são transmitidas diretamente<br>
-                Nenhum dado é armazenado no servidor
+                🔒 Mensagens transmitidas diretamente<br>
+                Nenhum dado armazenado no servidor
             </p>
         </div>
 
-        <!-- Main Screen -->
+        <!-- Tela Principal -->
         <div id="mainScreen" class="main-screen">
             <!-- Header -->
             <div class="app-header">
                 <div class="header-left">
-                    <button class="back-button" id="backButton" onclick="goBackToUsers()">
-                        ←
-                    </button>
+                    <button class="back-button" id="backButton" onclick="goBackToUsers()">←</button>
                     <div class="avatar" id="headerAvatar">
                         👤
                         <div class="online-dot" id="onlineDot"></div>
@@ -687,16 +578,12 @@
                     </div>
                 </div>
                 <div class="header-actions">
-                    <button class="icon-button" onclick="refreshUsers()" title="Atualizar">
-                        🔄
-                    </button>
-                    <button class="icon-button" onclick="handleLogout()" title="Sair">
-                        🚪
-                    </button>
+                    <button class="icon-button" onclick="refreshUsers()" title="Atualizar">🔄</button>
+                    <button class="icon-button" onclick="handleLogout()" title="Sair">🚪</button>
                 </div>
             </div>
 
-            <!-- Users List -->
+            <!-- Lista de Usuários -->
             <div class="users-list" id="usersList">
                 <div class="empty-state">
                     <div class="empty-state-icon">🔍</div>
@@ -705,13 +592,12 @@
                 </div>
             </div>
 
-            <!-- Chat Area -->
+            <!-- Área do Chat -->
             <div class="chat-area" id="chatArea">
                 <div class="messages-container" id="messagesContainer"></div>
-                <div class="typing-indicator" id="typingIndicator">digitando...</div>
             </div>
 
-            <!-- Input Area -->
+            <!-- Input de Mensagem -->
             <div class="input-area" id="inputArea">
                 <input 
                     type="text" 
@@ -720,26 +606,18 @@
                     maxlength="1000"
                     autocomplete="off"
                 >
-                <button class="send-button" id="sendButton" onclick="sendMessage()">
-                    ➤
-                </button>
+                <button class="send-button" id="sendButton" onclick="sendMessage()">➤</button>
             </div>
         </div>
     </div>
 
     <script>
-        // ==================== CONFIGURAÇÃO ====================
-        // Substitua com seus dados do Supabase
-        const SUPABASE_URL = 'https://SEU_PROJETO.supabase.co';
-        const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON';
+        // ==================== CONFIGURAÇÃO SUPABASE ====================
+        const SUPABASE_URL = 'https://fqbxhkcdefwsuefifygk.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_jC8Ntyx8QD2FHkP8Bqa63A_sLljd1Fj';
         
         // Inicializar Supabase
-        let supabase;
-        try {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } catch (error) {
-            console.error('Erro ao inicializar Supabase:', error);
-        }
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // ==================== ESTADO DA APLICAÇÃO ====================
         let currentUser = null;
@@ -750,7 +628,7 @@
 
         // ==================== FUNÇÕES DE UI ====================
         function showScreen(screenId) {
-            const screens = ['splashScreen', 'loginScreen', 'mainScreen'];
+            const screens = ['loginScreen', 'mainScreen'];
             screens.forEach(id => {
                 document.getElementById(id).style.display = 'none';
             });
@@ -768,7 +646,6 @@
 
         // ==================== AUTENTICAÇÃO ====================
         function generateUserId(username) {
-            // Criar um ID único baseado no username
             return 'user_' + btoa(username.toLowerCase().trim()).replace(/[/+=]/g, '').substring(0, 20);
         }
 
@@ -846,7 +723,6 @@
             if (!currentUser) return;
             
             try {
-                // Usar broadcast para presença em vez de tabela
                 const channel = supabase.channel('presence_global');
                 
                 await channel.subscribe(async (status) => {
@@ -864,7 +740,6 @@
                     }
                 });
                 
-                // Pequeno delay para garantir envio
                 await new Promise(resolve => setTimeout(resolve, 100));
                 supabase.removeChannel(channel);
                 
@@ -883,6 +758,12 @@
             presenceChannel
                 .on('broadcast', { event: 'presence_update' }, (payload) => {
                     handlePresenceUpdate(payload.payload);
+                })
+                .on('broadcast', { event: 'presence_request' }, async (payload) => {
+                    // Responder com presença quando solicitado
+                    if (currentUser && payload.payload.requester_id !== currentUser.id) {
+                        await updatePresence(true);
+                    }
                 })
                 .subscribe();
         }
@@ -909,7 +790,7 @@
         }
 
         async function loadOnlineUsers() {
-            // Broadcast para solicitar presença de todos
+            // Solicitar presença de todos
             const channel = supabase.channel('presence_global');
             
             await channel.subscribe(async (status) => {
@@ -924,7 +805,6 @@
                 }
             });
             
-            // Aguardar respostas
             await new Promise(resolve => setTimeout(resolve, 500));
             supabase.removeChannel(channel);
             
@@ -940,12 +820,12 @@
                 usersListEl.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">👥</div>
-                        <div class="empty-state-text">Nenhum usuário online no momento</div>
+                        <div class="empty-state-text">Nenhum usuário online</div>
                         <p style="color: var(--text-secondary); font-size: 13px;">
-                            Abra em outro navegador para testar
+                            Abra em outro navegador ou dispositivo
                         </p>
                         <button class="btn-primary" style="width: auto; padding: 10px 30px; font-size: 14px;" onclick="refreshUsers()">
-                            Atualizar Lista
+                            🔄 Atualizar
                         </button>
                     </div>
                 `;
@@ -984,7 +864,8 @@
             document.getElementById('backButton').style.display = 'none';
             document.getElementById('headerName').textContent = 'Conversas';
             document.getElementById('headerStatus').textContent = 'online';
-            document.getElementById('headerAvatar').innerHTML = '👤';
+            document.getElementById('headerAvatar').textContent = '👤';
+            document.getElementById('onlineDot').style.display = 'block';
         }
 
         function showChat() {
@@ -1061,7 +942,6 @@
         }
 
         function getChannelName(userId1, userId2) {
-            // Canal único para o par de usuários
             return 'chat_' + [userId1, userId2].sort().join('_');
         }
 
@@ -1112,9 +992,6 @@
                  messageData.sender_id === currentUser.id)) {
                 displayMessage(messageData, messageData.sender_id === currentUser.id);
                 saveMessageLocally(messageData);
-                
-                // Reproduzir som de notificação (opcional)
-                playNotificationSound();
             }
         }
 
@@ -1132,7 +1009,7 @@
             wrapper.innerHTML = `
                 ${!isSent ? `<div class="message-sender">${escapeHtml(messageData.sender_name)}</div>` : ''}
                 <div class="message-bubble">
-                    ${formatMessage(messageData.content)}
+                    ${escapeHtml(messageData.content)}
                 </div>
                 <div class="message-footer">
                     <span class="message-time">${time}</span>
@@ -1145,21 +1022,6 @@
 
         function generateMessageId() {
             return 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        }
-
-        function formatMessage(text) {
-            // Converter URLs em links
-            const urlRegex = /(https?:\/\/[^\s]+)/g;
-            text = text.replace(urlRegex, url => `<a href="${url}" target="_blank" style="color: #81c3ff;">${url}</a>`);
-            
-            // Converter emojis básicos
-            text = text.replace(/:\)/g, '😊');
-            text = text.replace(/:\(/g, '😢');
-            text = text.replace(/:D/g, '😃');
-            text = text.replace(/:P/g, '😛');
-            text = text.replace(/<3/g, '❤️');
-            
-            return text;
         }
 
         // ==================== ARMAZENAMENTO LOCAL ====================
@@ -1192,31 +1054,6 @@
                 const isSent = msg.sender_id === currentUser.id;
                 displayMessage(msg, isSent);
             });
-        }
-
-        // ==================== NOTIFICAÇÕES ====================
-        function playNotificationSound() {
-            // Criar som simples com Web Audio API
-            try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.frequency.value = 800;
-                oscillator.type = 'sine';
-                gainNode.gain.value = 0.1;
-                
-                oscillator.start();
-                setTimeout(() => {
-                    oscillator.stop();
-                    audioContext.close();
-                }, 200);
-            } catch (e) {
-                // Ignorar erros de áudio
-            }
         }
 
         // ==================== UTILITÁRIOS ====================
@@ -1259,16 +1096,10 @@
 
         // ==================== INICIALIZAÇÃO ====================
         async function init() {
-            // Mostrar splash
-            showScreen('splashScreen');
-            
-            // Aguardar carregamento
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            // Verificar sessão
+            // Verificar sessão salva
             const savedUser = localStorage.getItem('wp2p_user');
             
-            if (savedUser && supabase) {
+            if (savedUser) {
                 try {
                     currentUser = JSON.parse(savedUser);
                     
@@ -1289,6 +1120,7 @@
                     return;
                 } catch (error) {
                     console.error('Erro ao restaurar sessão:', error);
+                    localStorage.removeItem('wp2p_user');
                 }
             }
             
