@@ -6,25 +6,8 @@
     <title>WhatsApp</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root {
-            --verde-whatsapp: #075e54;
-            --verde-claro: #25d366;
-            --fundo-chat: #efeae2;
-            --fundo-header: #f0f2f5;
-            --cinza-borda: #e9edef;
-            --bolha-enviada: #d9fdd3;
-            --bolha-recebida: #ffffff;
-            --texto-primario: #111b21;
-            --texto-secundario: #667781;
-            --azul-link: #027eb5;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #dddbd2;
@@ -43,26 +26,24 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
 
-        /* Sidebar */
         .sidebar {
             width: 420px;
-            border-right: 1px solid var(--cinza-borda);
+            border-right: 1px solid #e9edef;
             display: flex;
             flex-direction: column;
             background: #fff;
         }
 
         .sidebar-header {
-            background: var(--fundo-header);
+            background: #f0f2f5;
             padding: 10px 16px;
             height: 60px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--cinza-borda);
+            border-bottom: 1px solid #e9edef;
         }
 
-        .sidebar-header .avatar {
+        .avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
@@ -72,68 +53,37 @@
             justify-content: center;
             font-size: 16px;
             color: #54656f;
-            cursor: pointer;
         }
 
-        .sidebar-header-actions {
-            display: flex;
-            gap: 10px;
+        .sidebar-header-info {
+            flex: 1;
+            margin-left: 15px;
         }
 
-        .sidebar-header-actions button {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: none;
-            background: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: #54656f;
-            transition: 0.2s;
-        }
-
-        .sidebar-header-actions button:hover {
-            background: #d9dbdd;
+        .sidebar-header-name {
+            font-size: 16px;
+            color: #111b21;
+            font-weight: 500;
         }
 
         .refresh-btn {
-            background: #00a884 !important;
-            color: white !important;
-            font-size: 14px !important;
-            width: auto !important;
-            padding: 0 15px !important;
-            border-radius: 20px !important;
+            background: #00a884;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 500;
         }
 
         .refresh-btn:hover {
-            background: #008f72 !important;
-        }
-
-        .search-bar {
-            padding: 7px 12px;
-            background: #fff;
-            border-bottom: 1px solid var(--cinza-borda);
-        }
-
-        .search-bar input {
-            width: 100%;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 8px;
-            background: var(--fundo-header);
-            font-size: 14px;
-            outline: none;
-            color: var(--texto-primario);
-        }
-
-        .search-bar input::placeholder {
-            color: var(--texto-secundario);
+            background: #008f72;
         }
 
         .chat-list {
             flex: 1;
             overflow-y: auto;
-            background: #fff;
         }
 
         .chat-list::-webkit-scrollbar {
@@ -155,13 +105,8 @@
             transition: 0.2s;
         }
 
-        .chat-item:hover {
-            background: #f0f2f5;
-        }
-
-        .chat-item.active {
-            background: #f0f2f5;
-        }
+        .chat-item:hover { background: #f0f2f5; }
+        .chat-item.active { background: #f0f2f5; }
 
         .user-avatar {
             width: 49px;
@@ -177,32 +122,10 @@
             position: relative;
         }
 
-        .user-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .user-name {
-            font-size: 16px;
-            color: var(--texto-primario);
-            margin-bottom: 3px;
-        }
-
-        .user-status-text {
-            font-size: 13px;
-            color: var(--texto-secundario);
-        }
-
-        .user-time {
-            font-size: 12px;
-            color: var(--texto-secundario);
-            flex-shrink: 0;
-        }
-
         .online-dot {
             width: 12px;
             height: 12px;
-            background: var(--verde-claro);
+            background: #25d366;
             border-radius: 50%;
             border: 2px solid white;
             position: absolute;
@@ -210,98 +133,43 @@
             right: 0;
         }
 
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            padding: 30px;
-            text-align: center;
-            color: var(--texto-secundario);
+        .user-info {
+            flex: 1;
+            min-width: 0;
         }
 
-        .empty-state .icon {
-            font-size: 60px;
-            margin-bottom: 20px;
+        .user-name {
+            font-size: 16px;
+            color: #111b21;
+            margin-bottom: 3px;
         }
 
-        .empty-state h3 {
-            font-size: 18px;
-            color: var(--texto-primario);
-            margin-bottom: 10px;
+        .user-status {
+            font-size: 13px;
+            color: #667781;
         }
 
-        .empty-state p {
-            font-size: 14px;
-            margin-bottom: 20px;
+        .user-time {
+            font-size: 12px;
+            color: #667781;
+            flex-shrink: 0;
         }
 
-        .empty-state button {
-            background: #00a884;
-            color: white;
-            border: none;
-            padding: 10px 30px;
-            border-radius: 20px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .empty-state button:hover {
-            background: #008f72;
-        }
-
-        /* Chat principal */
         .main-chat {
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: var(--fundo-chat);
-            position: relative;
-        }
-
-        .main-chat::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect fill="%23efeae2" width="400" height="400"/><rect fill="%23e2dbcf" y="200" width="400" height="200"/></svg>');
-            background-size: cover;
-            opacity: 0.4;
-        }
-
-        .main-chat-content {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
+            background: #efeae2;
         }
 
         .chat-header {
-            background: var(--fundo-header);
+            background: #f0f2f5;
             padding: 10px 16px;
             height: 60px;
             display: flex;
             align-items: center;
             gap: 15px;
-            border-bottom: 1px solid var(--cinza-borda);
-            z-index: 2;
-        }
-
-        .chat-header .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #dfe5e7;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            color: #54656f;
+            border-bottom: 1px solid #e9edef;
         }
 
         .chat-header .header-info {
@@ -311,12 +179,12 @@
         .chat-header .header-name {
             font-size: 16px;
             font-weight: 500;
-            color: var(--texto-primario);
+            color: #111b21;
         }
 
         .chat-header .header-status {
             font-size: 13px;
-            color: var(--texto-secundario);
+            color: #667781;
         }
 
         .chat-header button {
@@ -328,17 +196,15 @@
             font-size: 20px;
             cursor: pointer;
             color: #54656f;
-            transition: 0.2s;
         }
 
-        .chat-header button:hover {
-            background: #d9dbdd;
-        }
+        .chat-header button:hover { background: #d9dbdd; }
 
         .messages-area {
             flex: 1;
             overflow-y: auto;
             padding: 20px 60px;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect fill="%23efeae2" width="400" height="400"/></svg>');
         }
 
         .messages-area::-webkit-scrollbar {
@@ -356,13 +222,8 @@
             flex-direction: column;
         }
 
-        .message.sent {
-            align-items: flex-end;
-        }
-
-        .message.received {
-            align-items: flex-start;
-        }
+        .message.sent { align-items: flex-end; }
+        .message.received { align-items: flex-start; }
 
         .message-bubble {
             max-width: 65%;
@@ -370,7 +231,6 @@
             border-radius: 7.5px;
             font-size: 14.2px;
             line-height: 19px;
-            position: relative;
             word-wrap: break-word;
             box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
         }
@@ -392,59 +252,22 @@
             font-weight: 500;
         }
 
-        .message-content {
-            display: flex;
-            align-items: flex-end;
-            gap: 5px;
-        }
-
-        .message-text {
-            flex: 1;
-        }
-
-        .message-meta {
-            display: flex;
-            align-items: center;
-            gap: 3px;
+        .message-time {
+            font-size: 11px;
+            color: #667781;
             float: right;
             margin-left: 8px;
             margin-top: -10px;
         }
 
-        .message-time {
-            font-size: 11px;
-            color: #667781;
-            white-space: nowrap;
-        }
-
-        .message.sent .message-time {
-            color: #8696a0;
-        }
+        .message.sent .message-time { color: #8696a0; }
 
         .input-area {
-            background: var(--fundo-header);
+            background: #f0f2f5;
             padding: 5px 16px;
             display: flex;
             align-items: center;
             gap: 8px;
-            z-index: 2;
-        }
-
-        .input-area button {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            border: none;
-            background: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #54656f;
-            flex-shrink: 0;
-            transition: 0.2s;
-        }
-
-        .input-area button:hover {
-            background: #d9dbdd;
         }
 
         .input-area input {
@@ -455,12 +278,23 @@
             background: #fff;
             font-size: 15px;
             outline: none;
-            color: var(--texto-primario);
+            color: #111b21;
         }
 
-        .input-area input::placeholder {
-            color: var(--texto-secundario);
+        .input-area input::placeholder { color: #667781; }
+
+        .input-area button {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: none;
+            background: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #54656f;
         }
+
+        .input-area button:hover { background: #d9dbdd; }
 
         .welcome-screen {
             flex: 1;
@@ -471,7 +305,7 @@
             background: #f0f2f5;
         }
 
-        .welcome-screen .big-icon {
+        .welcome-screen .icon {
             font-size: 80px;
             margin-bottom: 20px;
         }
@@ -487,16 +321,49 @@
             font-size: 14px;
             color: #667781;
             text-align: center;
-            max-width: 500px;
             line-height: 20px;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            color: #667781;
+            padding: 30px;
+        }
+
+        .empty-state .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            color: #111b21;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state button {
+            background: #00a884;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
         }
 
         .login-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.5);
             display: flex;
             align-items: center;
@@ -515,7 +382,7 @@
 
         .login-modal h3 {
             font-size: 20px;
-            color: var(--texto-primario);
+            color: #111b21;
             margin-bottom: 20px;
             font-weight: 400;
         }
@@ -540,311 +407,196 @@
             font-size: 15px;
             cursor: pointer;
         }
-
-        .login-modal button:hover {
-            background: #008f72;
-        }
     </style>
 </head>
 <body>
     <div class="app">
-        <!-- Sidebar -->
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="avatar" id="meuAvatar">👤</div>
-                <div style="flex:1;margin-left:15px;">
-                    <div style="font-size:16px;color:#111b21;font-weight:500;" id="meuNome">WhatsApp</div>
+                <div class="sidebar-header-info">
+                    <div class="sidebar-header-name" id="meuNome">WhatsApp</div>
                 </div>
-                <div class="sidebar-header-actions">
-                    <button class="refresh-btn" onclick="atualizarLista()">🔄 Atualizar</button>
-                    <button onclick="sair()">🚪</button>
-                </div>
-            </div>
-
-            <div class="search-bar">
-                <input type="text" placeholder="Pesquisar ou começar uma nova conversa" readonly>
+                <button class="refresh-btn" onclick="atualizarLista()">🔄 Atualizar</button>
             </div>
 
             <div class="chat-list" id="listaConversas">
                 <div class="empty-state">
-                    <div class="icon">🔍</div>
-                    <h3>Procurando contatos</h3>
-                    <p>Clique em "Atualizar" para buscar usuários online</p>
-                    <button onclick="atualizarLista()">🔄 Atualizar Agora</button>
+                    <div class="icon">💬</div>
+                    <h3>WhatsApp Web</h3>
+                    <p>Clique em "Atualizar" para ver contatos online</p>
+                    <button onclick="atualizarLista()">🔄 Atualizar</button>
                 </div>
             </div>
         </div>
 
-        <!-- Chat principal -->
         <div class="main-chat" id="mainChat">
-            <div class="main-chat-content">
-                <div class="chat-header" id="chatHeader" style="display:none;">
-                    <div class="user-avatar" id="chatAvatar">👤</div>
-                    <div class="header-info">
-                        <div class="header-name" id="chatName">Nome</div>
-                        <div class="header-status" id="chatStatus">online</div>
-                    </div>
-                    <button onclick="fecharChat()">←</button>
+            <div class="chat-header" id="chatHeader" style="display:none;">
+                <div class="user-avatar" id="chatAvatar" style="width:40px;height:40px;font-size:16px;">👤</div>
+                <div class="header-info">
+                    <div class="header-name" id="chatName">Nome</div>
+                    <div class="header-status" id="chatStatus">online</div>
                 </div>
+                <button onclick="fecharChat()">←</button>
+            </div>
 
-                <div class="messages-area" id="messagesArea"></div>
+            <div class="messages-area" id="messagesArea"></div>
 
-                <div class="input-area" id="inputArea" style="display:none;">
-                    <button>😀</button>
-                    <button>📎</button>
-                    <input type="text" id="msgInput" placeholder="Digite uma mensagem" maxlength="1000">
-                    <button id="sendBtn" onclick="enviarMensagem()">🎤</button>
-                </div>
+            <div class="input-area" id="inputArea" style="display:none;">
+                <button>😀</button>
+                <input type="text" id="msgInput" placeholder="Digite uma mensagem" maxlength="1000">
+                <button id="sendBtn" onclick="enviarMensagem()">🎤</button>
             </div>
         </div>
 
-        <!-- Boas-vindas -->
         <div class="welcome-screen" id="welcomeScreen">
-            <div class="big-icon">💬</div>
+            <div class="icon">💬</div>
             <h2>WhatsApp Web</h2>
             <p>Envie e receba mensagens em tempo real.<br>As mensagens não são armazenadas no servidor.</p>
         </div>
     </div>
 
-    <!-- Login -->
     <div class="login-overlay" id="loginOverlay">
         <div class="login-modal">
             <h3>Entre com seu nome</h3>
             <input type="text" id="nameInput" placeholder="Seu nome" maxlength="25">
-            <button onclick="fazerLogin()">Entrar no WhatsApp</button>
+            <button onclick="fazerLogin()">Entrar</button>
         </div>
     </div>
 
     <script>
-        // Configuração
         const SB_URL = 'https://fqbxhkcdefwsuefifygk.supabase.co';
         const SB_KEY = 'sb_publishable_jC8Ntyx8QD2FHkP8Bqa63A_sLljd1Fj';
         const sb = window.supabase.createClient(SB_URL, SB_KEY);
 
         let eu = null;
         let conversaAtual = null;
-        let canalMensagens = null;
-        let canalPresenca = null;
+        let canalAtual = null;
         let usuariosOnline = {};
         let ultimaMensagem = {};
 
-        console.log('✅ App iniciado!');
+        // ============ Função simplificada para broadcast ============
+        function criarCanalPresenca() {
+            const canal = sb.channel('presenca_global', {
+                config: {
+                    broadcast: { self: true },
+                    presence: { key: '' }
+                }
+            });
 
-        // ============ LOGIN ============
-        function fazerLogin() {
-            const nome = document.getElementById('nameInput').value.trim();
-            if (!nome || nome.length < 2) return alert('Digite um nome válido');
-
-            eu = {
-                id: 'u_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-                nome: nome
-            };
-
-            localStorage.setItem('wp_user', JSON.stringify(eu));
-            
-            document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('meuNome').textContent = nome;
-            document.getElementById('meuAvatar').textContent = nome.substr(0,2).toUpperCase();
-            
-            console.log('✅ Login:', nome);
-            
-            // Conectar e anunciar
-            conectarPresenca();
-            
-            // Anunciar após um delay
-            setTimeout(() => {
-                anunciarOnline();
-                console.log('📢 Anunciei presença');
-            }, 500);
-            
-            // Solicitar usuários após delay
-            setTimeout(() => {
-                solicitarUsuarios();
-                console.log('🔍 Solicitei lista de usuários');
-            }, 1500);
-        }
-
-        function sair() {
-            if (canalMensagens) sb.removeChannel(canalMensagens);
-            if (canalPresenca) sb.removeChannel(canalPresenca);
-            
-            eu = null;
-            conversaAtual = null;
-            usuariosOnline = {};
-            ultimaMensagem = {};
-            
-            localStorage.removeItem('wp_user');
-            
-            document.getElementById('loginOverlay').style.display = 'flex';
-            document.getElementById('nameInput').value = '';
-            document.getElementById('listaConversas').innerHTML = `
-                <div class="empty-state">
-                    <div class="icon">🔍</div>
-                    <h3>Procurando contatos</h3>
-                    <p>Clique em "Atualizar" para buscar usuários online</p>
-                    <button onclick="atualizarLista()">🔄 Atualizar Agora</button>
-                </div>
-            `;
-            fecharChat();
-        }
-
-        // ============ PRESENÇA ============
-        function conectarPresenca() {
-            if (canalPresenca) {
-                sb.removeChannel(canalPresenca);
-            }
-            
-            console.log('📡 Conectando ao canal de presença...');
-            
-            canalPresenca = sb.channel('presenca_global_v3');
-            
-            canalPresenca
-                .on('broadcast', { event: 'online' }, (payload) => {
+            canal
+                .on('broadcast', { event: 'user_online' }, (payload) => {
                     const user = payload.payload;
-                    console.log('👤 Usuário online detectado:', user.nome);
-                    
                     if (user.id !== eu?.id) {
                         usuariosOnline[user.id] = user;
                         renderizarLista();
                     }
                 })
-                .on('broadcast', { event: 'solicitar_usuarios' }, () => {
-                    console.log('📩 Recebi solicitação de usuários, respondendo...');
-                    anunciarOnline();
+                .on('broadcast', { event: 'ping_all' }, () => {
+                    if (eu) anunciarOnline();
                 })
                 .subscribe((status) => {
-                    console.log('📊 Status do canal:', status);
-                    
                     if (status === 'SUBSCRIBED') {
-                        console.log('✅ Canal de presença conectado com sucesso!');
-                        
-                        // Solicitar usuários ao conectar
-                        setTimeout(() => {
-                            solicitarUsuarios();
-                        }, 1000);
-                    } else if (status === 'CHANNEL_ERROR') {
-                        console.error('❌ Erro no canal de presença');
-                    } else if (status === 'TIMED_OUT') {
-                        console.error('⏰ Timeout no canal de presença');
+                        console.log('✅ Canal conectado!');
+                        // Pedir lista
+                        canal.send({
+                            type: 'broadcast',
+                            event: 'ping_all',
+                            payload: {}
+                        });
                     }
                 });
+
+            return canal;
         }
 
-        async function anunciarOnline() {
-            if (!eu) return;
+        function fazerLogin() {
+            const nome = document.getElementById('nameInput').value.trim();
+            if (!nome || nome.length < 2) return alert('Digite um nome válido');
+
+            eu = { id: 'u_' + Date.now(), nome: nome };
+            localStorage.setItem('wp_user', JSON.stringify(eu));
             
-            console.log('📢 Anunciando presença:', eu.nome);
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('meuNome').textContent = nome;
+            document.getElementById('meuAvatar').textContent = nome.substr(0,2).toUpperCase();
+
+            // Criar canal de presença
+            canalAtual = criarCanalPresenca();
             
-            try {
-                const ch = sb.channel('presenca_global_v3');
-                
-                await new Promise((resolve, reject) => {
-                    const timeout = setTimeout(() => {
-                        reject(new Error('Timeout'));
-                    }, 5000);
-                    
-                    ch.subscribe(async (status) => {
-                        if (status === 'SUBSCRIBED') {
-                            clearTimeout(timeout);
-                            
-                            await ch.send({
-                                type: 'broadcast',
-                                event: 'online',
-                                payload: {
-                                    id: eu.id,
-                                    nome: eu.nome,
-                                    time: Date.now()
-                                }
-                            });
-                            
-                            console.log('✅ Presença anunciada com sucesso!');
-                            
-                            setTimeout(() => {
-                                sb.removeChannel(ch);
-                                resolve();
-                            }, 300);
-                        }
-                    });
-                });
-            } catch(e) {
-                console.error('❌ Erro ao anunciar:', e);
-            }
+            // Anunciar
+            setTimeout(() => anunciarOnline(), 500);
         }
 
-        async function solicitarUsuarios() {
-            console.log('🔍 Solicitando lista de usuários...');
-            
-            try {
-                const ch = sb.channel('presenca_global_v3');
-                
-                await new Promise((resolve, reject) => {
-                    const timeout = setTimeout(() => {
-                        reject(new Error('Timeout'));
-                    }, 5000);
-                    
-                    ch.subscribe(async (status) => {
-                        if (status === 'SUBSCRIBED') {
-                            clearTimeout(timeout);
-                            
-                            await ch.send({
-                                type: 'broadcast',
-                                event: 'solicitar_usuarios',
-                                payload: { 
-                                    solicitante: eu.id,
-                                    time: Date.now()
-                                }
-                            });
-                            
-                            console.log('✅ Solicitação enviada! Aguardando respostas...');
-                            
-                            // Aguardar respostas
-                            setTimeout(() => {
-                                sb.removeChannel(ch);
-                                renderizarLista();
-                                console.log('📋 Lista atualizada. Usuários online:', Object.keys(usuariosOnline).length);
-                                resolve();
-                            }, 2000);
-                        }
-                    });
-                });
-            } catch(e) {
-                console.error('❌ Erro ao solicitar:', e);
-                renderizarLista();
+        function sair() {
+            if (canalAtual) {
+                sb.removeChannel(canalAtual);
+                canalAtual = null;
             }
+            eu = null;
+            conversaAtual = null;
+            usuariosOnline = {};
+            localStorage.removeItem('wp_user');
+            document.getElementById('loginOverlay').style.display = 'flex';
+            document.getElementById('nameInput').value = '';
+            fecharChat();
+            document.getElementById('listaConversas').innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">💬</div>
+                    <h3>WhatsApp Web</h3>
+                    <p>Clique em "Atualizar" para ver contatos online</p>
+                    <button onclick="atualizarLista()">🔄 Atualizar</button>
+                </div>
+            `;
+        }
+
+        function anunciarOnline() {
+            if (!eu || !canalAtual) return;
+            
+            canalAtual.send({
+                type: 'broadcast',
+                event: 'user_online',
+                payload: { id: eu.id, nome: eu.nome, time: Date.now() }
+            });
         }
 
         function atualizarLista() {
-            console.log('🔄 Atualizando lista manualmente...');
-            
             document.getElementById('listaConversas').innerHTML = `
                 <div class="empty-state">
                     <div class="icon">⏳</div>
                     <h3>Atualizando...</h3>
-                    <p>Procurando usuários online</p>
                 </div>
             `;
             
-            // Reanunciar e solicitar
-            anunciarOnline().then(() => {
+            if (!canalAtual && eu) {
+                canalAtual = criarCanalPresenca();
+            }
+            
+            if (canalAtual) {
+                canalAtual.send({
+                    type: 'broadcast',
+                    event: 'ping_all',
+                    payload: {}
+                });
+                
                 setTimeout(() => {
-                    solicitarUsuarios();
-                }, 1000);
-            });
+                    anunciarOnline();
+                    renderizarLista();
+                }, 1500);
+            }
         }
 
         function renderizarLista() {
             const container = document.getElementById('listaConversas');
             const users = Object.values(usuariosOnline).filter(u => u.id !== eu?.id);
             
-            console.log('👥 Renderizando lista. Usuários:', users.length);
-            
             if (users.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="icon">👥</div>
                         <h3>Nenhum contato online</h3>
-                        <p>Abra este site em outro navegador ou dispositivo<br>e faça login com outro nome</p>
-                        <button onclick="atualizarLista()">🔄 Atualizar Lista</button>
+                        <p>Abra em outro navegador/dispositivo<br>e faça login com outro nome</p>
+                        <button onclick="atualizarLista()">🔄 Atualizar</button>
                     </div>
                 `;
                 return;
@@ -852,8 +604,6 @@
             
             container.innerHTML = users.map(u => {
                 const ultima = ultimaMensagem[u.id];
-                const hora = ultima ? new Date(ultima.time).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}) : '';
-                
                 return `
                     <div class="chat-item ${conversaAtual?.id === u.id ? 'active' : ''}" onclick="abrirConversa('${u.id}', '${u.nome}')">
                         <div class="user-avatar">
@@ -862,15 +612,14 @@
                         </div>
                         <div class="user-info">
                             <div class="user-name">${u.nome}</div>
-                            <div class="user-status-text">${ultima ? ultima.texto.substr(0, 30) : 'Online agora'}</div>
+                            <div class="user-status">${ultima ? ultima.texto.substr(0, 30) : 'Online'}</div>
                         </div>
-                        <div class="user-time">${hora}</div>
+                        <div class="user-time">${ultima ? new Date(ultima.time).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}) : 'agora'}</div>
                     </div>
                 `;
             }).join('');
         }
 
-        // ============ CONVERSA ============
         function abrirConversa(userId, nome) {
             conversaAtual = { id: userId, nome: nome };
             
@@ -883,19 +632,12 @@
             document.getElementById('chatStatus').textContent = 'online';
             
             document.getElementById('messagesArea').innerHTML = '';
-            
             carregarMensagens();
-            conectarMensagens();
             renderizarLista();
         }
 
         function fecharChat() {
-            if (canalMensagens) {
-                sb.removeChannel(canalMensagens);
-                canalMensagens = null;
-            }
             conversaAtual = null;
-            
             document.getElementById('welcomeScreen').style.display = 'flex';
             document.getElementById('chatHeader').style.display = 'none';
             document.getElementById('messagesArea').style.display = 'none';
@@ -903,28 +645,9 @@
             document.getElementById('messagesArea').innerHTML = '';
         }
 
-        // ============ MENSAGENS ============
-        function conectarMensagens() {
-            if (canalMensagens) sb.removeChannel(canalMensagens);
-            
-            const nomeCanal = 'chat_msg_' + [eu.id, conversaAtual.id].sort().join('_');
-            canalMensagens = sb.channel(nomeCanal);
-            
-            canalMensagens.on('broadcast', { event: 'msg' }, (payload) => {
-                const msg = payload.payload;
-                if (conversaAtual && (msg.de === conversaAtual.id || msg.para === conversaAtual.id)) {
-                    mostrarMensagem(msg, msg.de === eu.id);
-                    salvarMensagem(msg);
-                    ultimaMensagem[msg.de === eu.id ? msg.para : msg.de] = { texto: msg.texto, time: msg.hora };
-                    if (!conversaAtual) renderizarLista();
-                }
-            }).subscribe();
-        }
-
         async function enviarMensagem() {
             const input = document.getElementById('msgInput');
             const texto = input.value.trim();
-            
             if (!texto || !conversaAtual) return;
             
             const msg = {
@@ -936,22 +659,24 @@
                 hora: Date.now()
             };
             
+            // Salvar e mostrar localmente
+            mostrarMensagem(msg, true);
+            salvarMensagem(msg);
+            ultimaMensagem[conversaAtual.id] = { texto: texto, time: msg.hora };
+            input.value = '';
+            input.focus();
+            
+            // Enviar via broadcast
             try {
-                const nomeCanal = 'chat_msg_' + [eu.id, conversaAtual.id].sort().join('_');
-                const ch = sb.channel(nomeCanal);
-                await ch.subscribe();
-                await ch.send({ type: 'broadcast', event: 'msg', payload: msg });
-                setTimeout(() => sb.removeChannel(ch), 300);
-                
-                mostrarMensagem(msg, true);
-                salvarMensagem(msg);
-                ultimaMensagem[conversaAtual.id] = { texto: texto, time: msg.hora };
-                input.value = '';
-                input.focus();
+                const ch = sb.channel('chat_' + [eu.id, conversaAtual.id].sort().join('_'));
+                ch.subscribe(async (status) => {
+                    if (status === 'SUBSCRIBED') {
+                        await ch.send({ type: 'broadcast', event: 'msg', payload: msg });
+                        setTimeout(() => sb.removeChannel(ch), 500);
+                    }
+                });
             } catch(e) {
-                mostrarMensagem(msg, true);
-                salvarMensagem(msg);
-                input.value = '';
+                console.log('Erro envio:', e);
             }
         }
 
@@ -965,10 +690,8 @@
             div.innerHTML = `
                 ${!enviada ? `<div class="message-sender">~${msg.deNome}</div>` : ''}
                 <div class="message-bubble">
-                    <div class="message-text">${escapeHtml(msg.texto)}</div>
-                    <div class="message-meta">
-                        <span class="message-time">${hora}</span>
-                    </div>
+                    ${msg.texto.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+                    <span class="message-time">${hora}</span>
                 </div>
             `;
             
@@ -992,13 +715,7 @@
             msgs.forEach(msg => mostrarMensagem(msg, msg.de === eu.id));
         }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // ============ EVENTOS ============
+        // Eventos
         document.getElementById('msgInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') enviarMensagem();
         });
@@ -1009,47 +726,22 @@
 
         document.getElementById('msgInput').addEventListener('input', function() {
             const btn = document.getElementById('sendBtn');
-            if (this.value.trim()) {
-                btn.textContent = '➤';
-                btn.style.color = '#00a884';
-            } else {
-                btn.textContent = '🎤';
-                btn.style.color = '#54656f';
-            }
+            btn.textContent = this.value.trim() ? '➤' : '🎤';
+            btn.style.color = this.value.trim() ? '#00a884' : '#54656f';
         });
 
-        // Manter presença ativa
-        setInterval(() => {
-            if (eu) {
-                anunciarOnline();
-            }
-        }, 25000);
+        setInterval(() => { if (eu) anunciarOnline(); }, 30000);
 
         // Auto-login
         window.addEventListener('load', () => {
             const salvo = localStorage.getItem('wp_user');
             if (salvo) {
-                try {
-                    eu = JSON.parse(salvo);
-                    document.getElementById('loginOverlay').style.display = 'none';
-                    document.getElementById('meuNome').textContent = eu.nome;
-                    document.getElementById('meuAvatar').textContent = eu.nome.substr(0,2).toUpperCase();
-                    
-                    console.log('🔄 Auto-login:', eu.nome);
-                    
-                    conectarPresenca();
-                    setTimeout(() => {
-                        anunciarOnline();
-                    }, 500);
-                    
-                    setTimeout(() => {
-                        solicitarUsuarios();
-                    }, 1500);
-                    
-                } catch(e) {
-                    console.error('Erro auto-login:', e);
-                    localStorage.removeItem('wp_user');
-                }
+                eu = JSON.parse(salvo);
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('meuNome').textContent = eu.nome;
+                document.getElementById('meuAvatar').textContent = eu.nome.substr(0,2).toUpperCase();
+                canalAtual = criarCanalPresenca();
+                setTimeout(() => anunciarOnline(), 500);
             }
         });
     </script>
