@@ -6,12 +6,8 @@
     <title>Chat P2P</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
             font-family: Arial, sans-serif;
             background: #111b21;
@@ -19,18 +15,17 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            color: white;
         }
 
-        .app {
+        .container {
             width: 100%;
             max-width: 450px;
             height: 100vh;
             background: #111b21;
-            color: white;
         }
 
-        /* Login */
-        #loginScreen {
+        .login {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -40,11 +35,7 @@
             gap: 20px;
         }
 
-        #loginScreen h1 {
-            font-size: 28px;
-        }
-
-        #loginScreen input {
+        .login input {
             width: 100%;
             padding: 15px;
             border: none;
@@ -55,7 +46,7 @@
             outline: none;
         }
 
-        #loginScreen button {
+        .login button {
             width: 100%;
             padding: 15px;
             border: none;
@@ -67,18 +58,7 @@
             cursor: pointer;
         }
 
-        #loginScreen button:active {
-            background: #008f72;
-        }
-
-        .error {
-            color: #ff4444;
-            font-size: 14px;
-            display: none;
-        }
-
-        /* Chat */
-        #chatScreen {
+        .chat {
             display: none;
             flex-direction: column;
             height: 100%;
@@ -92,35 +72,33 @@
             gap: 10px;
         }
 
-        .header button {
+        .header .back {
             background: none;
             border: none;
             color: white;
-            font-size: 20px;
+            font-size: 24px;
             cursor: pointer;
             display: none;
         }
 
-        .header .name {
+        .header .title {
             flex: 1;
-            font-size: 16px;
-            font-weight: 500;
+            font-size: 18px;
         }
 
-        .header .logout {
+        .header .exit {
             background: none;
             border: none;
             color: #8696a0;
             cursor: pointer;
-            font-size: 14px;
         }
 
-        #usersList {
+        .users {
             flex: 1;
             overflow-y: auto;
         }
 
-        .user-card {
+        .user {
             padding: 15px 20px;
             display: flex;
             align-items: center;
@@ -129,11 +107,9 @@
             border-bottom: 1px solid #202c33;
         }
 
-        .user-card:active {
-            background: #202c33;
-        }
+        .user:active { background: #202c33; }
 
-        .user-avatar {
+        .avatar {
             width: 50px;
             height: 50px;
             border-radius: 50%;
@@ -145,7 +121,7 @@
             font-weight: bold;
         }
 
-        #messagesContainer {
+        .messages {
             flex: 1;
             overflow-y: auto;
             padding: 20px;
@@ -154,56 +130,53 @@
         }
 
         .msg {
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             display: flex;
             flex-direction: column;
         }
 
-        .msg.sent {
-            align-items: flex-end;
-        }
+        .msg.sent { align-items: flex-end; }
+        .msg.recv { align-items: flex-start; }
 
-        .msg.received {
-            align-items: flex-start;
-        }
-
-        .msg-bubble {
+        .bubble {
             max-width: 80%;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 15px;
             word-wrap: break-word;
         }
 
-        .msg.sent .msg-bubble {
+        .msg.sent .bubble {
             background: #005c4b;
+            border-radius: 10px 0 10px 10px;
         }
 
-        .msg.received .msg-bubble {
+        .msg.recv .bubble {
             background: #202c33;
+            border-radius: 0 10px 10px 10px;
         }
 
-        .msg-sender {
+        .sender {
             font-size: 12px;
             color: #06cf9c;
-            margin-bottom: 2px;
+            margin-bottom: 3px;
         }
 
-        .msg-time {
+        .time {
             font-size: 11px;
             color: #8696a0;
-            margin-top: 2px;
+            margin-top: 3px;
             text-align: right;
         }
 
-        .input-bar {
+        .input-area {
             background: #202c33;
             padding: 10px 15px;
             display: none;
             gap: 10px;
         }
 
-        .input-bar input {
+        .input-area input {
             flex: 1;
             padding: 12px 15px;
             border: none;
@@ -214,131 +187,110 @@
             font-size: 15px;
         }
 
-        .input-bar button {
+        .input-area button {
             width: 45px;
             height: 45px;
             border-radius: 50%;
             background: #00a884;
             border: none;
             color: white;
-            font-size: 20px;
+            font-size: 22px;
             cursor: pointer;
         }
 
         .empty {
             text-align: center;
-            color: #8696a0;
-            padding: 50px 20px;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
+            padding: 50px;
             color: #8696a0;
         }
     </style>
 </head>
 <body>
-    <div class="app">
-        <!-- TELA DE LOGIN -->
-        <div id="loginScreen">
+    <div class="container">
+        <!-- LOGIN -->
+        <div id="loginScreen" class="login">
             <h1>💬 Chat P2P</h1>
             <input type="text" id="nameInput" placeholder="Digite seu nome" maxlength="20">
-            <div class="error" id="errorMsg">Digite um nome válido</div>
-            <button onclick="login()">ENTRAR NO CHAT</button>
-            <small style="color:#8696a0;">Mensagens diretas sem servidor</small>
+            <button onclick="fazerLogin()">ENTRAR NO CHAT</button>
         </div>
 
-        <!-- TELA DO CHAT -->
-        <div id="chatScreen">
+        <!-- CHAT -->
+        <div id="chatScreen" class="chat">
             <div class="header">
-                <button id="backBtn" onclick="goBack()">←</button>
-                <div class="name" id="headerName">Conversas</div>
-                <button class="logout" onclick="logout()">Sair</button>
+                <button class="back" id="btnVoltar" onclick="voltar()">←</button>
+                <div class="title" id="titulo">Conversas</div>
+                <button class="exit" onclick="sair()">Sair</button>
             </div>
 
-            <div id="usersList">
-                <div class="empty">
-                    <p style="font-size:40px;">🔍</p>
-                    <p>Procurando usuários online...</p>
-                </div>
+            <div id="listaUsers" class="users">
+                <div class="empty">🔍 Procurando usuários...</div>
             </div>
 
-            <div id="messagesContainer"></div>
+            <div id="mensagens" class="messages"></div>
 
-            <div class="input-bar" id="inputBar">
-                <input type="text" id="msgInput" placeholder="Digite uma mensagem" maxlength="500">
-                <button onclick="sendMsg()">➤</button>
+            <div class="input-area" id="inputArea">
+                <input type="text" id="msgInput" placeholder="Mensagem" maxlength="500">
+                <button onclick="enviar()">➤</button>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO - USANDO SUAS CREDENCIAIS
+        // ============ CONFIGURAÇÃO ============
         const SUPABASE_URL = 'https://fqbxhkcdefwsuefifygk.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_jC8Ntyx8QD2FHkP8Bqa63A_sLljd1Fj';
         
-        let supabase;
-        let currentUser = null;
-        let currentChat = null;
-        let msgChannel = null;
-        let onlineUsers = {};
-
-        // Inicializar Supabase
-        try {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            console.log('✅ Supabase conectado!');
-        } catch(e) {
-            console.error('❌ Erro Supabase:', e);
-        }
+        // Criar conexão Supabase UMA ÚNICA VEZ
+        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // Variáveis do app
+        let eu = null;
+        let conversa = null;
+        let canal = null;
+        let usuariosOnline = {};
 
         // ============ LOGIN ============
-        async function login() {
-            const name = document.getElementById('nameInput').value.trim();
-            const errorEl = document.getElementById('errorMsg');
+        function fazerLogin() {
+            const nome = document.getElementById('nameInput').value.trim();
             
-            if (!name || name.length < 2) {
-                errorEl.style.display = 'block';
-                errorEl.textContent = 'Digite um nome com pelo menos 2 caracteres';
+            if (!nome || nome.length < 2) {
+                alert('Digite um nome com pelo menos 2 caracteres');
                 return;
             }
-            
-            errorEl.style.display = 'none';
-            
+
             // Criar usuário
-            currentUser = {
-                id: 'u_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-                name: name
+            eu = {
+                id: 'u_' + Date.now(),
+                nome: nome
             };
-            
-            // Salvar
-            localStorage.setItem('chat_user', JSON.stringify(currentUser));
-            
-            // Mostrar chat
+
+            // Salvar no navegador
+            localStorage.setItem('chat_user', JSON.stringify(eu));
+
+            // Mostrar tela do chat
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('chatScreen').style.display = 'flex';
-            document.getElementById('headerName').textContent = 'Conversas';
-            
+            document.getElementById('titulo').textContent = 'Conversas';
+
             // Mostrar lista de usuários
-            showUsersList();
-            
-            // Conectar ao canal de presença
-            connectPresence();
-            
+            mostrarLista();
+
+            // Conectar presença
+            conectarPresenca();
+
             // Anunciar que estou online
-            setTimeout(() => {
-                announceOnline();
-            }, 500);
-            
-            console.log('✅ Login feito:', currentUser.name);
+            setTimeout(anunciarOnline, 1000);
         }
 
-        // ============ LOGOUT ============
-        function logout() {
-            if (msgChannel) supabase.removeChannel(msgChannel);
-            currentUser = null;
-            currentChat = null;
-            onlineUsers = {};
+        // ============ SAIR ============
+        function sair() {
+            if (canal) {
+                sb.removeChannel(canal);
+                canal = null;
+            }
+            eu = null;
+            conversa = null;
+            usuariosOnline = {};
             localStorage.removeItem('chat_user');
             
             document.getElementById('loginScreen').style.display = 'flex';
@@ -347,83 +299,62 @@
         }
 
         // ============ PRESENÇA ============
-        function connectPresence() {
-            const channel = supabase.channel('presence-global');
+        function conectarPresenca() {
+            const ch = sb.channel('presenca_global');
             
-            channel
-                .on('broadcast', { event: 'online' }, (payload) => {
-                    const user = payload.payload;
-                    if (user.id !== currentUser?.id) {
-                        onlineUsers[user.id] = user;
-                        renderUsers();
-                        console.log('👤 Usuário online:', user.name);
-                    }
-                })
-                .on('broadcast', { event: 'request_users' }, () => {
-                    // Alguém pediu a lista, vou me anunciar
-                    announceOnline();
-                })
-                .subscribe((status) => {
-                    if (status === 'SUBSCRIBED') {
-                        console.log('✅ Canal de presença conectado');
-                        // Pedir lista de usuários
-                        channel.send({
-                            type: 'broadcast',
-                            event: 'request_users',
-                            payload: {}
-                        });
-                    }
-                });
+            ch.on('broadcast', { event: 'online' }, (payload) => {
+                const user = payload.payload;
+                if (user.id !== eu?.id) {
+                    usuariosOnline[user.id] = user;
+                    renderizarUsuarios();
+                }
+            }).on('broadcast', { event: 'ping' }, () => {
+                anunciarOnline();
+            }).subscribe((status) => {
+                if (status === 'SUBSCRIBED') {
+                    console.log('✅ Canal de presença OK');
+                    // Pedir usuários online
+                    ch.send({
+                        type: 'broadcast',
+                        event: 'ping',
+                        payload: {}
+                    });
+                }
+            });
         }
 
-        async function announceOnline() {
-            if (!currentUser) return;
+        async function anunciarOnline() {
+            if (!eu) return;
             
             try {
-                const channel = supabase.channel('presence-global');
-                await channel.subscribe();
-                await channel.send({
+                const ch = sb.channel('presenca_global');
+                await ch.subscribe();
+                await ch.send({
                     type: 'broadcast',
                     event: 'online',
                     payload: {
-                        id: currentUser.id,
-                        name: currentUser.name,
+                        id: eu.id,
+                        nome: eu.nome,
                         time: Date.now()
                     }
                 });
-                setTimeout(() => supabase.removeChannel(channel), 200);
+                setTimeout(() => sb.removeChannel(ch), 300);
             } catch(e) {
-                console.error('Erro announce:', e);
+                console.log('Erro anunciar:', e);
             }
         }
 
-        // ============ LISTA DE USUÁRIOS ============
-        function showUsersList() {
-            document.getElementById('usersList').style.display = 'block';
-            document.getElementById('messagesContainer').style.display = 'none';
-            document.getElementById('inputBar').style.display = 'none';
-            document.getElementById('backBtn').style.display = 'none';
-            document.getElementById('headerName').textContent = 'Conversas';
-        }
-
-        function showChat() {
-            document.getElementById('usersList').style.display = 'none';
-            document.getElementById('messagesContainer').style.display = 'block';
-            document.getElementById('inputBar').style.display = 'flex';
-            document.getElementById('backBtn').style.display = 'block';
-        }
-
-        function renderUsers() {
-            const container = document.getElementById('usersList');
-            const users = Object.values(onlineUsers).filter(u => u.id !== currentUser?.id);
+        function renderizarUsuarios() {
+            const container = document.getElementById('listaUsers');
+            const users = Object.values(usuariosOnline).filter(u => u.id !== eu?.id);
             
             if (users.length === 0) {
                 container.innerHTML = `
                     <div class="empty">
-                        <p style="font-size:40px;">👥</p>
+                        <p style="font-size:50px;">👥</p>
                         <p>Nenhum usuário online</p>
-                        <p style="font-size:13px;margin-top:10px;">Abra este site em outro navegador</p>
-                        <button onclick="refreshUsers()" style="margin-top:15px;padding:10px 20px;background:#00a884;border:none;color:white;border-radius:5px;cursor:pointer;">
+                        <p style="font-size:13px;">Abra em outro navegador</p>
+                        <button onclick="atualizar()" style="margin-top:15px;padding:10px 20px;background:#00a884;border:none;color:white;border-radius:5px;cursor:pointer;">
                             🔄 Atualizar
                         </button>
                     </div>
@@ -432,207 +363,193 @@
             }
             
             container.innerHTML = users.map(u => `
-                <div class="user-card" onclick="openChat('${u.id}', '${u.name}')">
-                    <div class="user-avatar">${u.name.substr(0,2).toUpperCase()}</div>
-                    <div style="color:white;font-size:16px;">${u.name}</div>
-                    <div style="margin-left:auto;color:#00a884;font-size:12px;">online</div>
+                <div class="user" onclick="abrirConversa('${u.id}', '${u.nome}')">
+                    <div class="avatar">${u.nome.substr(0,2).toUpperCase()}</div>
+                    <div style="flex:1;">${u.nome}</div>
+                    <div style="color:#00a884;font-size:12px;">online</div>
                 </div>
             `).join('');
         }
 
-        function refreshUsers() {
-            document.getElementById('usersList').innerHTML = '<div class="loading">⏳ Atualizando...</div>';
-            announceOnline();
+        function atualizar() {
+            document.getElementById('listaUsers').innerHTML = '<div class="empty">⏳ Atualizando...</div>';
+            anunciarOnline();
             setTimeout(() => {
-                const channel = supabase.channel('presence-global');
-                channel.subscribe((status) => {
+                const ch = sb.channel('presenca_global');
+                ch.subscribe((status) => {
                     if (status === 'SUBSCRIBED') {
-                        channel.send({
+                        ch.send({
                             type: 'broadcast',
-                            event: 'request_users',
+                            event: 'ping',
                             payload: {}
                         });
                         setTimeout(() => {
-                            supabase.removeChannel(channel);
-                            renderUsers();
-                        }, 1000);
+                            sb.removeChannel(ch);
+                            renderizarUsuarios();
+                        }, 1500);
                     }
                 });
             }, 500);
         }
 
-        // ============ CHAT ============
-        function openChat(userId, userName) {
-            currentChat = { id: userId, name: userName };
-            
-            document.getElementById('headerName').textContent = userName;
-            showChat();
-            
-            // Limpar mensagens
-            document.getElementById('messagesContainer').innerHTML = '';
-            
-            // Carregar mensagens salvas
-            loadMessages();
-            
-            // Conectar ao canal de mensagens
-            connectMessages();
+        // ============ INTERFACE ============
+        function mostrarLista() {
+            document.getElementById('listaUsers').style.display = 'block';
+            document.getElementById('mensagens').style.display = 'none';
+            document.getElementById('inputArea').style.display = 'none';
+            document.getElementById('btnVoltar').style.display = 'none';
+            document.getElementById('titulo').textContent = 'Conversas';
         }
 
-        function goBack() {
-            if (msgChannel) {
-                supabase.removeChannel(msgChannel);
-                msgChannel = null;
+        function mostrarChat() {
+            document.getElementById('listaUsers').style.display = 'none';
+            document.getElementById('mensagens').style.display = 'block';
+            document.getElementById('inputArea').style.display = 'flex';
+            document.getElementById('btnVoltar').style.display = 'block';
+        }
+
+        // ============ CONVERSA ============
+        function abrirConversa(userId, nome) {
+            conversa = { id: userId, nome: nome };
+            
+            document.getElementById('titulo').textContent = nome;
+            document.getElementById('mensagens').innerHTML = '';
+            
+            mostrarChat();
+            carregarMensagens();
+            conectarMensagens();
+        }
+
+        function voltar() {
+            if (canal) {
+                sb.removeChannel(canal);
+                canal = null;
             }
-            currentChat = null;
-            showUsersList();
-            renderUsers();
+            conversa = null;
+            mostrarLista();
+            renderizarUsuarios();
         }
 
         // ============ MENSAGENS ============
-        function connectMessages() {
-            if (msgChannel) supabase.removeChannel(msgChannel);
+        function conectarMensagens() {
+            if (canal) sb.removeChannel(canal);
             
-            const channelName = 'chat_' + [currentUser.id, currentChat.id].sort().join('_');
+            const nomeCanal = 'chat_' + [eu.id, conversa.id].sort().join('_');
+            canal = sb.channel(nomeCanal);
             
-            msgChannel = supabase.channel(channelName);
-            
-            msgChannel
-                .on('broadcast', { event: 'msg' }, (payload) => {
-                    const msg = payload.payload;
-                    if (currentChat && (msg.from === currentChat.id || msg.to === currentChat.id)) {
-                        displayMessage(msg, msg.from === currentUser.id);
-                        saveMessage(msg);
-                    }
-                })
-                .subscribe((status) => {
-                    if (status === 'SUBSCRIBED') {
-                        console.log('✅ Canal de mensagens conectado');
-                    }
-                });
+            canal.on('broadcast', { event: 'msg' }, (payload) => {
+                const msg = payload.payload;
+                if (conversa && (msg.de === conversa.id || msg.para === conversa.id)) {
+                    mostrarMensagem(msg, msg.de === eu.id);
+                    salvarMensagem(msg);
+                }
+            }).subscribe();
         }
 
-        async function sendMsg() {
+        async function enviar() {
             const input = document.getElementById('msgInput');
-            const text = input.value.trim();
+            const texto = input.value.trim();
             
-            if (!text || !currentChat) return;
+            if (!texto || !conversa) return;
             
             const msg = {
                 id: 'm_' + Date.now(),
-                from: currentUser.id,
-                fromName: currentUser.name,
-                to: currentChat.id,
-                text: text,
-                time: Date.now()
+                de: eu.id,
+                deNome: eu.nome,
+                para: conversa.id,
+                texto: texto,
+                hora: Date.now()
             };
             
             try {
-                const channelName = 'chat_' + [currentUser.id, currentChat.id].sort().join('_');
-                const channel = supabase.channel(channelName);
-                
-                await channel.subscribe();
-                await channel.send({
+                const nomeCanal = 'chat_' + [eu.id, conversa.id].sort().join('_');
+                const ch = sb.channel(nomeCanal);
+                await ch.subscribe();
+                await ch.send({
                     type: 'broadcast',
                     event: 'msg',
                     payload: msg
                 });
+                setTimeout(() => sb.removeChannel(ch), 300);
                 
-                setTimeout(() => supabase.removeChannel(channel), 200);
-                
-                displayMessage(msg, true);
-                saveMessage(msg);
-                
+                mostrarMensagem(msg, true);
+                salvarMensagem(msg);
                 input.value = '';
                 input.focus();
-                
             } catch(e) {
-                console.error('Erro ao enviar:', e);
-                // Se falhar o broadcast, pelo menos mostra localmente
-                displayMessage(msg, true);
-                saveMessage(msg);
+                console.log('Erro enviar:', e);
+                mostrarMensagem(msg, true);
+                salvarMensagem(msg);
                 input.value = '';
             }
         }
 
-        function displayMessage(msg, isSent) {
-            const container = document.getElementById('messagesContainer');
+        function mostrarMensagem(msg, enviada) {
+            const container = document.getElementById('mensagens');
             const div = document.createElement('div');
-            div.className = 'msg ' + (isSent ? 'sent' : 'received');
+            div.className = 'msg ' + (enviada ? 'sent' : 'recv');
             
-            const time = new Date(msg.time).toLocaleTimeString('pt-BR', {
+            const hora = new Date(msg.hora).toLocaleTimeString('pt-BR', {
                 hour: '2-digit',
                 minute: '2-digit'
             });
             
             div.innerHTML = `
-                ${!isSent ? `<div class="msg-sender">${msg.fromName}</div>` : ''}
-                <div class="msg-bubble">${escapeHtml(msg.text)}</div>
-                <div class="msg-time">${time}</div>
+                ${!enviada ? `<div class="sender">${msg.deNome}</div>` : ''}
+                <div class="bubble">${msg.texto}</div>
+                <div class="time">${hora}</div>
             `;
             
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
         }
 
-        function saveMessage(msg) {
-            const key = 'msgs_' + [msg.from, msg.to].sort().join('_');
-            let messages = JSON.parse(localStorage.getItem(key) || '[]');
+        function salvarMensagem(msg) {
+            const chave = 'msgs_' + [msg.de, msg.para].sort().join('_');
+            let msgs = JSON.parse(localStorage.getItem(chave) || '[]');
             
-            if (!messages.find(m => m.id === msg.id)) {
-                messages.push(msg);
-                if (messages.length > 100) messages = messages.slice(-100);
-                localStorage.setItem(key, JSON.stringify(messages));
+            if (!msgs.find(m => m.id === msg.id)) {
+                msgs.push(msg);
+                if (msgs.length > 100) msgs = msgs.slice(-100);
+                localStorage.setItem(chave, JSON.stringify(msgs));
             }
         }
 
-        function loadMessages() {
-            const key = 'msgs_' + [currentUser.id, currentChat.id].sort().join('_');
-            const messages = JSON.parse(localStorage.getItem(key) || '[]');
+        function carregarMensagens() {
+            const chave = 'msgs_' + [eu.id, conversa.id].sort().join('_');
+            const msgs = JSON.parse(localStorage.getItem(chave) || '[]');
             
-            messages.forEach(msg => {
-                const isSent = msg.from === currentUser.id;
-                displayMessage(msg, isSent);
+            msgs.forEach(msg => {
+                mostrarMensagem(msg, msg.de === eu.id);
             });
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
         }
 
         // ============ EVENTOS ============
         document.getElementById('msgInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                sendMsg();
-            }
+            if (e.key === 'Enter') enviar();
         });
 
         document.getElementById('nameInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                login();
-            }
+            if (e.key === 'Enter') fazerLogin();
         });
 
-        // Manter presença
+        // Manter online
         setInterval(() => {
-            if (currentUser) announceOnline();
+            if (eu) anunciarOnline();
         }, 30000);
 
         // Auto-login
         window.addEventListener('load', function() {
-            const saved = localStorage.getItem('chat_user');
-            if (saved) {
+            const salvo = localStorage.getItem('chat_user');
+            if (salvo) {
                 try {
-                    currentUser = JSON.parse(saved);
+                    eu = JSON.parse(salvo);
                     document.getElementById('loginScreen').style.display = 'none';
                     document.getElementById('chatScreen').style.display = 'flex';
-                    document.getElementById('headerName').textContent = 'Conversas';
-                    showUsersList();
-                    connectPresence();
-                    setTimeout(() => announceOnline(), 500);
-                    console.log('✅ Auto-login:', currentUser.name);
+                    document.getElementById('titulo').textContent = 'Conversas';
+                    mostrarLista();
+                    conectarPresenca();
+                    setTimeout(anunciarOnline, 1000);
                 } catch(e) {
                     localStorage.removeItem('chat_user');
                 }
