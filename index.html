@@ -1,14 +1,643 @@
-const supabase = window.supabase.createClient(
-    'https://fqbxhkcdefwsuefifygk.supabase.co',
-    'sb_publishable_jC8Ntyx8QD2FHkP8Bqa63A_sLljd1Fj'
-);
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat P2P</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-const channel = supabase.channel('test');
-channel.subscribe((status) => {
-    console.log('Status:', status);
-    if (status === 'SUBSCRIBED') {
-        console.log('✅ FUNCIONANDO!');
-    } else {
-        console.log('❌ ERRO:', status);
-    }
-});
+        body {
+            font-family: Arial, sans-serif;
+            background: #111b21;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            background: #111b21;
+            color: white;
+        }
+
+        /* Login */
+        #loginScreen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 30px;
+            gap: 20px;
+        }
+
+        #loginScreen h1 {
+            font-size: 28px;
+        }
+
+        #loginScreen input {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #2a3942;
+            color: white;
+            font-size: 16px;
+            outline: none;
+        }
+
+        #loginScreen button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #00a884;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #loginScreen button:active {
+            background: #008f72;
+        }
+
+        .error {
+            color: #ff4444;
+            font-size: 14px;
+            display: none;
+        }
+
+        /* Chat */
+        #chatScreen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .header {
+            background: #202c33;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: none;
+        }
+
+        .header .name {
+            flex: 1;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .header .logout {
+            background: none;
+            border: none;
+            color: #8696a0;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #usersList {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .user-card {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #202c33;
+        }
+
+        .user-card:active {
+            background: #202c33;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        #messagesContainer {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #0b141a;
+            display: none;
+        }
+
+        .msg {
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .msg.sent {
+            align-items: flex-end;
+        }
+
+        .msg.received {
+            align-items: flex-start;
+        }
+
+        .msg-bubble {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            word-wrap: break-word;
+        }
+
+        .msg.sent .msg-bubble {
+            background: #005c4b;
+        }
+
+        .msg.received .msg-bubble {
+            background: #202c33;
+        }
+
+        .msg-sender {
+            font-size: 12px;
+            color: #06cf9c;
+            margin-bottom: 2px;
+        }
+
+        .msg-time {
+            font-size: 11px;
+            color: #8696a0;
+            margin-top: 2px;
+            text-align: right;
+        }
+
+        .input-bar {
+            background: #202c33;
+            padding: 10px 15px;
+            display: none;
+            gap: 10px;
+        }
+
+        .input-bar input {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 20px;
+            background: #2a3942;
+            color: white;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .input-bar button {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #00a884;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .empty {
+            text-align: center;
+            color: #8696a0;
+            padding: 50px 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #8696a0;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- TELA DE LOGIN -->
+        <div id="loginScreen">
+            <h1>💬 Chat P2P</h1>
+            <input type="text" id="nameInput" placeholder="Digite seu nome" maxlength="20">
+            <div class="error" id="errorMsg">Digite um nome válido</div>
+            <button onclick="login()">ENTRAR NO CHAT</button>
+            <small style="color:#8696a0;">Mensagens diretas sem servidor</small>
+        </div>
+
+        <!-- TELA DO CHAT -->
+        <div id="chatScreen">
+            <div class="header">
+                <button id="backBtn" onclick="goBack()">←</button>
+                <div class="name" id="headerName">Conversas</div>
+                <button class="logout" onclick="logout()">Sair</button>
+            </div>
+
+            <div id="usersList">
+                <div class="empty">
+                    <p style="font-size:40px;">🔍</p>
+                    <p>Procurando usuários online...</p>
+                </div>
+            </div>
+
+            <div id="messagesContainer"></div>
+
+            <div class="input-bar" id="inputBar">
+                <input type="text" id="msgInput" placeholder="Digite uma mensagem" maxlength="500">
+                <button onclick="sendMsg()">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURAÇÃO - USANDO SUAS CREDENCIAIS
+        const SUPABASE_URL = 'https://fqbxhkcdefwsuefifygk.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_jC8Ntyx8QD2FHkP8Bqa63A_sLljd1Fj';
+        
+        let supabase;
+        let currentUser = null;
+        let currentChat = null;
+        let msgChannel = null;
+        let onlineUsers = {};
+
+        // Inicializar Supabase
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            console.log('✅ Supabase conectado!');
+        } catch(e) {
+            console.error('❌ Erro Supabase:', e);
+        }
+
+        // ============ LOGIN ============
+        async function login() {
+            const name = document.getElementById('nameInput').value.trim();
+            const errorEl = document.getElementById('errorMsg');
+            
+            if (!name || name.length < 2) {
+                errorEl.style.display = 'block';
+                errorEl.textContent = 'Digite um nome com pelo menos 2 caracteres';
+                return;
+            }
+            
+            errorEl.style.display = 'none';
+            
+            // Criar usuário
+            currentUser = {
+                id: 'u_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                name: name
+            };
+            
+            // Salvar
+            localStorage.setItem('chat_user', JSON.stringify(currentUser));
+            
+            // Mostrar chat
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('chatScreen').style.display = 'flex';
+            document.getElementById('headerName').textContent = 'Conversas';
+            
+            // Mostrar lista de usuários
+            showUsersList();
+            
+            // Conectar ao canal de presença
+            connectPresence();
+            
+            // Anunciar que estou online
+            setTimeout(() => {
+                announceOnline();
+            }, 500);
+            
+            console.log('✅ Login feito:', currentUser.name);
+        }
+
+        // ============ LOGOUT ============
+        function logout() {
+            if (msgChannel) supabase.removeChannel(msgChannel);
+            currentUser = null;
+            currentChat = null;
+            onlineUsers = {};
+            localStorage.removeItem('chat_user');
+            
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('chatScreen').style.display = 'none';
+            document.getElementById('nameInput').value = '';
+        }
+
+        // ============ PRESENÇA ============
+        function connectPresence() {
+            const channel = supabase.channel('presence-global');
+            
+            channel
+                .on('broadcast', { event: 'online' }, (payload) => {
+                    const user = payload.payload;
+                    if (user.id !== currentUser?.id) {
+                        onlineUsers[user.id] = user;
+                        renderUsers();
+                        console.log('👤 Usuário online:', user.name);
+                    }
+                })
+                .on('broadcast', { event: 'request_users' }, () => {
+                    // Alguém pediu a lista, vou me anunciar
+                    announceOnline();
+                })
+                .subscribe((status) => {
+                    if (status === 'SUBSCRIBED') {
+                        console.log('✅ Canal de presença conectado');
+                        // Pedir lista de usuários
+                        channel.send({
+                            type: 'broadcast',
+                            event: 'request_users',
+                            payload: {}
+                        });
+                    }
+                });
+        }
+
+        async function announceOnline() {
+            if (!currentUser) return;
+            
+            try {
+                const channel = supabase.channel('presence-global');
+                await channel.subscribe();
+                await channel.send({
+                    type: 'broadcast',
+                    event: 'online',
+                    payload: {
+                        id: currentUser.id,
+                        name: currentUser.name,
+                        time: Date.now()
+                    }
+                });
+                setTimeout(() => supabase.removeChannel(channel), 200);
+            } catch(e) {
+                console.error('Erro announce:', e);
+            }
+        }
+
+        // ============ LISTA DE USUÁRIOS ============
+        function showUsersList() {
+            document.getElementById('usersList').style.display = 'block';
+            document.getElementById('messagesContainer').style.display = 'none';
+            document.getElementById('inputBar').style.display = 'none';
+            document.getElementById('backBtn').style.display = 'none';
+            document.getElementById('headerName').textContent = 'Conversas';
+        }
+
+        function showChat() {
+            document.getElementById('usersList').style.display = 'none';
+            document.getElementById('messagesContainer').style.display = 'block';
+            document.getElementById('inputBar').style.display = 'flex';
+            document.getElementById('backBtn').style.display = 'block';
+        }
+
+        function renderUsers() {
+            const container = document.getElementById('usersList');
+            const users = Object.values(onlineUsers).filter(u => u.id !== currentUser?.id);
+            
+            if (users.length === 0) {
+                container.innerHTML = `
+                    <div class="empty">
+                        <p style="font-size:40px;">👥</p>
+                        <p>Nenhum usuário online</p>
+                        <p style="font-size:13px;margin-top:10px;">Abra este site em outro navegador</p>
+                        <button onclick="refreshUsers()" style="margin-top:15px;padding:10px 20px;background:#00a884;border:none;color:white;border-radius:5px;cursor:pointer;">
+                            🔄 Atualizar
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = users.map(u => `
+                <div class="user-card" onclick="openChat('${u.id}', '${u.name}')">
+                    <div class="user-avatar">${u.name.substr(0,2).toUpperCase()}</div>
+                    <div style="color:white;font-size:16px;">${u.name}</div>
+                    <div style="margin-left:auto;color:#00a884;font-size:12px;">online</div>
+                </div>
+            `).join('');
+        }
+
+        function refreshUsers() {
+            document.getElementById('usersList').innerHTML = '<div class="loading">⏳ Atualizando...</div>';
+            announceOnline();
+            setTimeout(() => {
+                const channel = supabase.channel('presence-global');
+                channel.subscribe((status) => {
+                    if (status === 'SUBSCRIBED') {
+                        channel.send({
+                            type: 'broadcast',
+                            event: 'request_users',
+                            payload: {}
+                        });
+                        setTimeout(() => {
+                            supabase.removeChannel(channel);
+                            renderUsers();
+                        }, 1000);
+                    }
+                });
+            }, 500);
+        }
+
+        // ============ CHAT ============
+        function openChat(userId, userName) {
+            currentChat = { id: userId, name: userName };
+            
+            document.getElementById('headerName').textContent = userName;
+            showChat();
+            
+            // Limpar mensagens
+            document.getElementById('messagesContainer').innerHTML = '';
+            
+            // Carregar mensagens salvas
+            loadMessages();
+            
+            // Conectar ao canal de mensagens
+            connectMessages();
+        }
+
+        function goBack() {
+            if (msgChannel) {
+                supabase.removeChannel(msgChannel);
+                msgChannel = null;
+            }
+            currentChat = null;
+            showUsersList();
+            renderUsers();
+        }
+
+        // ============ MENSAGENS ============
+        function connectMessages() {
+            if (msgChannel) supabase.removeChannel(msgChannel);
+            
+            const channelName = 'chat_' + [currentUser.id, currentChat.id].sort().join('_');
+            
+            msgChannel = supabase.channel(channelName);
+            
+            msgChannel
+                .on('broadcast', { event: 'msg' }, (payload) => {
+                    const msg = payload.payload;
+                    if (currentChat && (msg.from === currentChat.id || msg.to === currentChat.id)) {
+                        displayMessage(msg, msg.from === currentUser.id);
+                        saveMessage(msg);
+                    }
+                })
+                .subscribe((status) => {
+                    if (status === 'SUBSCRIBED') {
+                        console.log('✅ Canal de mensagens conectado');
+                    }
+                });
+        }
+
+        async function sendMsg() {
+            const input = document.getElementById('msgInput');
+            const text = input.value.trim();
+            
+            if (!text || !currentChat) return;
+            
+            const msg = {
+                id: 'm_' + Date.now(),
+                from: currentUser.id,
+                fromName: currentUser.name,
+                to: currentChat.id,
+                text: text,
+                time: Date.now()
+            };
+            
+            try {
+                const channelName = 'chat_' + [currentUser.id, currentChat.id].sort().join('_');
+                const channel = supabase.channel(channelName);
+                
+                await channel.subscribe();
+                await channel.send({
+                    type: 'broadcast',
+                    event: 'msg',
+                    payload: msg
+                });
+                
+                setTimeout(() => supabase.removeChannel(channel), 200);
+                
+                displayMessage(msg, true);
+                saveMessage(msg);
+                
+                input.value = '';
+                input.focus();
+                
+            } catch(e) {
+                console.error('Erro ao enviar:', e);
+                // Se falhar o broadcast, pelo menos mostra localmente
+                displayMessage(msg, true);
+                saveMessage(msg);
+                input.value = '';
+            }
+        }
+
+        function displayMessage(msg, isSent) {
+            const container = document.getElementById('messagesContainer');
+            const div = document.createElement('div');
+            div.className = 'msg ' + (isSent ? 'sent' : 'received');
+            
+            const time = new Date(msg.time).toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            div.innerHTML = `
+                ${!isSent ? `<div class="msg-sender">${msg.fromName}</div>` : ''}
+                <div class="msg-bubble">${escapeHtml(msg.text)}</div>
+                <div class="msg-time">${time}</div>
+            `;
+            
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function saveMessage(msg) {
+            const key = 'msgs_' + [msg.from, msg.to].sort().join('_');
+            let messages = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            if (!messages.find(m => m.id === msg.id)) {
+                messages.push(msg);
+                if (messages.length > 100) messages = messages.slice(-100);
+                localStorage.setItem(key, JSON.stringify(messages));
+            }
+        }
+
+        function loadMessages() {
+            const key = 'msgs_' + [currentUser.id, currentChat.id].sort().join('_');
+            const messages = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            messages.forEach(msg => {
+                const isSent = msg.from === currentUser.id;
+                displayMessage(msg, isSent);
+            });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ============ EVENTOS ============
+        document.getElementById('msgInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMsg();
+            }
+        });
+
+        document.getElementById('nameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
+
+        // Manter presença
+        setInterval(() => {
+            if (currentUser) announceOnline();
+        }, 30000);
+
+        // Auto-login
+        window.addEventListener('load', function() {
+            const saved = localStorage.getItem('chat_user');
+            if (saved) {
+                try {
+                    currentUser = JSON.parse(saved);
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('chatScreen').style.display = 'flex';
+                    document.getElementById('headerName').textContent = 'Conversas';
+                    showUsersList();
+                    connectPresence();
+                    setTimeout(() => announceOnline(), 500);
+                    console.log('✅ Auto-login:', currentUser.name);
+                } catch(e) {
+                    localStorage.removeItem('chat_user');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
