@@ -77,23 +77,15 @@
             font-weight: 500;
         }
 
-        .refresh-btn:hover {
-            background: #008f72;
-        }
+        .refresh-btn:hover { background: #008f72; }
 
         .chat-list {
             flex: 1;
             overflow-y: auto;
         }
 
-        .chat-list::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .chat-list::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 3px;
-        }
+        .chat-list::-webkit-scrollbar { width: 6px; }
+        .chat-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
 
         .chat-item {
             padding: 12px 16px;
@@ -133,27 +125,10 @@
             right: 0;
         }
 
-        .user-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .user-name {
-            font-size: 16px;
-            color: #111b21;
-            margin-bottom: 3px;
-        }
-
-        .user-status {
-            font-size: 13px;
-            color: #667781;
-        }
-
-        .user-time {
-            font-size: 12px;
-            color: #667781;
-            flex-shrink: 0;
-        }
+        .user-info { flex: 1; min-width: 0; }
+        .user-name { font-size: 16px; color: #111b21; margin-bottom: 3px; }
+        .user-status { font-size: 13px; color: #667781; }
+        .user-time { font-size: 12px; color: #667781; flex-shrink: 0; }
 
         .main-chat {
             flex: 1;
@@ -172,20 +147,9 @@
             border-bottom: 1px solid #e9edef;
         }
 
-        .chat-header .header-info {
-            flex: 1;
-        }
-
-        .chat-header .header-name {
-            font-size: 16px;
-            font-weight: 500;
-            color: #111b21;
-        }
-
-        .chat-header .header-status {
-            font-size: 13px;
-            color: #667781;
-        }
+        .chat-header .header-info { flex: 1; }
+        .chat-header .header-name { font-size: 16px; font-weight: 500; color: #111b21; }
+        .chat-header .header-status { font-size: 13px; color: #667781; }
 
         .chat-header button {
             width: 40px;
@@ -204,17 +168,11 @@
             flex: 1;
             overflow-y: auto;
             padding: 20px 60px;
-            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect fill="%23efeae2" width="400" height="400"/></svg>');
+            background: #efeae2;
         }
 
-        .messages-area::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .messages-area::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 3px;
-        }
+        .messages-area::-webkit-scrollbar { width: 6px; }
+        .messages-area::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
 
         .message {
             margin-bottom: 3px;
@@ -257,7 +215,7 @@
             color: #667781;
             float: right;
             margin-left: 8px;
-            margin-top: -10px;
+            margin-top: -8px;
         }
 
         .message.sent .message-time { color: #8696a0; }
@@ -305,24 +263,9 @@
             background: #f0f2f5;
         }
 
-        .welcome-screen .icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-        }
-
-        .welcome-screen h2 {
-            font-size: 32px;
-            font-weight: 300;
-            color: #41525d;
-            margin-bottom: 15px;
-        }
-
-        .welcome-screen p {
-            font-size: 14px;
-            color: #667781;
-            text-align: center;
-            line-height: 20px;
-        }
+        .welcome-screen .icon { font-size: 80px; margin-bottom: 20px; }
+        .welcome-screen h2 { font-size: 32px; font-weight: 300; color: #41525d; margin-bottom: 15px; }
+        .welcome-screen p { font-size: 14px; color: #667781; text-align: center; line-height: 20px; }
 
         .empty-state {
             display: flex;
@@ -335,23 +278,11 @@
             padding: 30px;
         }
 
-        .empty-state .icon {
-            font-size: 60px;
-            margin-bottom: 20px;
-        }
+        .empty-state .icon { font-size: 60px; margin-bottom: 20px; }
+        .empty-state h3 { font-size: 18px; color: #111b21; margin-bottom: 10px; }
+        .empty-state p { font-size: 14px; margin-bottom: 20px; }
 
-        .empty-state h3 {
-            font-size: 18px;
-            color: #111b21;
-            margin-bottom: 10px;
-        }
-
-        .empty-state p {
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-
-        .empty-state button {
+        .empty-state button, .login-modal button {
             background: #00a884;
             color: white;
             border: none;
@@ -395,17 +326,6 @@
             font-size: 16px;
             outline: none;
             margin-bottom: 20px;
-        }
-
-        .login-modal button {
-            width: 100%;
-            padding: 12px;
-            background: #00a884;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            cursor: pointer;
         }
     </style>
 </head>
@@ -471,20 +391,20 @@
 
         let eu = null;
         let conversaAtual = null;
-        let canalAtual = null;
+        let canalPresenca = null;
+        let canaisMensagens = {};
         let usuariosOnline = {};
         let ultimaMensagem = {};
 
-        // ============ Função simplificada para broadcast ============
+        // ============ PRESENÇA ============
         function criarCanalPresenca() {
-            const canal = sb.channel('presenca_global', {
-                config: {
-                    broadcast: { self: true },
-                    presence: { key: '' }
-                }
-            });
-
-            canal
+            if (canalPresenca) {
+                sb.removeChannel(canalPresenca);
+            }
+            
+            canalPresenca = sb.channel('presenca_global_v4');
+            
+            canalPresenca
                 .on('broadcast', { event: 'user_online' }, (payload) => {
                     const user = payload.payload;
                     if (user.id !== eu?.id) {
@@ -497,157 +417,69 @@
                 })
                 .subscribe((status) => {
                     if (status === 'SUBSCRIBED') {
-                        console.log('✅ Canal conectado!');
-                        // Pedir lista
-                        canal.send({
+                        console.log('✅ Presença conectada');
+                        canalPresenca.send({
                             type: 'broadcast',
                             event: 'ping_all',
                             payload: {}
                         });
                     }
                 });
-
-            return canal;
-        }
-
-        function fazerLogin() {
-            const nome = document.getElementById('nameInput').value.trim();
-            if (!nome || nome.length < 2) return alert('Digite um nome válido');
-
-            eu = { id: 'u_' + Date.now(), nome: nome };
-            localStorage.setItem('wp_user', JSON.stringify(eu));
-            
-            document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('meuNome').textContent = nome;
-            document.getElementById('meuAvatar').textContent = nome.substr(0,2).toUpperCase();
-
-            // Criar canal de presença
-            canalAtual = criarCanalPresenca();
-            
-            // Anunciar
-            setTimeout(() => anunciarOnline(), 500);
-        }
-
-        function sair() {
-            if (canalAtual) {
-                sb.removeChannel(canalAtual);
-                canalAtual = null;
-            }
-            eu = null;
-            conversaAtual = null;
-            usuariosOnline = {};
-            localStorage.removeItem('wp_user');
-            document.getElementById('loginOverlay').style.display = 'flex';
-            document.getElementById('nameInput').value = '';
-            fecharChat();
-            document.getElementById('listaConversas').innerHTML = `
-                <div class="empty-state">
-                    <div class="icon">💬</div>
-                    <h3>WhatsApp Web</h3>
-                    <p>Clique em "Atualizar" para ver contatos online</p>
-                    <button onclick="atualizarLista()">🔄 Atualizar</button>
-                </div>
-            `;
         }
 
         function anunciarOnline() {
-            if (!eu || !canalAtual) return;
+            if (!eu || !canalPresenca) return;
             
-            canalAtual.send({
+            canalPresenca.send({
                 type: 'broadcast',
                 event: 'user_online',
                 payload: { id: eu.id, nome: eu.nome, time: Date.now() }
             });
         }
 
-        function atualizarLista() {
-            document.getElementById('listaConversas').innerHTML = `
-                <div class="empty-state">
-                    <div class="icon">⏳</div>
-                    <h3>Atualizando...</h3>
-                </div>
-            `;
-            
-            if (!canalAtual && eu) {
-                canalAtual = criarCanalPresenca();
+        // ============ MENSAGENS ============
+        function criarCanalMensagens(userId) {
+            if (canaisMensagens[userId]) {
+                return; // Já existe
             }
             
-            if (canalAtual) {
-                canalAtual.send({
-                    type: 'broadcast',
-                    event: 'ping_all',
-                    payload: {}
-                });
+            const nomeCanal = 'chat_msg_' + [eu.id, userId].sort().join('_');
+            console.log('📡 Criando canal:', nomeCanal);
+            
+            const canal = sb.channel(nomeCanal);
+            
+            canal.on('broadcast', { event: 'msg' }, (payload) => {
+                console.log('📨 Mensagem recebida:', payload.payload);
+                const msg = payload.payload;
                 
-                setTimeout(() => {
-                    anunciarOnline();
+                // Mostrar se for do chat atual
+                if (conversaAtual && (msg.de === conversaAtual.id || msg.para === conversaAtual.id)) {
+                    mostrarMensagem(msg, msg.de === eu.id);
+                }
+                
+                // Salvar sempre
+                salvarMensagem(msg);
+                
+                // Atualizar última mensagem
+                const outro = msg.de === eu.id ? msg.para : msg.de;
+                ultimaMensagem[outro] = { texto: msg.texto, time: msg.hora };
+                
+                if (!conversaAtual || conversaAtual.id !== outro) {
                     renderizarLista();
-                }, 1500);
-            }
-        }
-
-        function renderizarLista() {
-            const container = document.getElementById('listaConversas');
-            const users = Object.values(usuariosOnline).filter(u => u.id !== eu?.id);
+                }
+            }).subscribe((status) => {
+                if (status === 'SUBSCRIBED') {
+                    console.log('✅ Canal de mensagens conectado:', nomeCanal);
+                }
+            });
             
-            if (users.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">👥</div>
-                        <h3>Nenhum contato online</h3>
-                        <p>Abra em outro navegador/dispositivo<br>e faça login com outro nome</p>
-                        <button onclick="atualizarLista()">🔄 Atualizar</button>
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = users.map(u => {
-                const ultima = ultimaMensagem[u.id];
-                return `
-                    <div class="chat-item ${conversaAtual?.id === u.id ? 'active' : ''}" onclick="abrirConversa('${u.id}', '${u.nome}')">
-                        <div class="user-avatar">
-                            ${u.nome.substr(0,2).toUpperCase()}
-                            <div class="online-dot"></div>
-                        </div>
-                        <div class="user-info">
-                            <div class="user-name">${u.nome}</div>
-                            <div class="user-status">${ultima ? ultima.texto.substr(0, 30) : 'Online'}</div>
-                        </div>
-                        <div class="user-time">${ultima ? new Date(ultima.time).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}) : 'agora'}</div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function abrirConversa(userId, nome) {
-            conversaAtual = { id: userId, nome: nome };
-            
-            document.getElementById('welcomeScreen').style.display = 'none';
-            document.getElementById('chatHeader').style.display = 'flex';
-            document.getElementById('messagesArea').style.display = 'block';
-            document.getElementById('inputArea').style.display = 'flex';
-            document.getElementById('chatName').textContent = nome;
-            document.getElementById('chatAvatar').textContent = nome.substr(0,2).toUpperCase();
-            document.getElementById('chatStatus').textContent = 'online';
-            
-            document.getElementById('messagesArea').innerHTML = '';
-            carregarMensagens();
-            renderizarLista();
-        }
-
-        function fecharChat() {
-            conversaAtual = null;
-            document.getElementById('welcomeScreen').style.display = 'flex';
-            document.getElementById('chatHeader').style.display = 'none';
-            document.getElementById('messagesArea').style.display = 'none';
-            document.getElementById('inputArea').style.display = 'none';
-            document.getElementById('messagesArea').innerHTML = '';
+            canaisMensagens[userId] = canal;
         }
 
         async function enviarMensagem() {
             const input = document.getElementById('msgInput');
             const texto = input.value.trim();
+            
             if (!texto || !conversaAtual) return;
             
             const msg = {
@@ -659,7 +491,9 @@
                 hora: Date.now()
             };
             
-            // Salvar e mostrar localmente
+            console.log('📤 Enviando mensagem:', texto);
+            
+            // Mostrar na tela imediatamente
             mostrarMensagem(msg, true);
             salvarMensagem(msg);
             ultimaMensagem[conversaAtual.id] = { texto: texto, time: msg.hora };
@@ -668,15 +502,27 @@
             
             // Enviar via broadcast
             try {
-                const ch = sb.channel('chat_' + [eu.id, conversaAtual.id].sort().join('_'));
+                const nomeCanal = 'chat_msg_' + [eu.id, conversaAtual.id].sort().join('_');
+                
+                // Criar canal temporário para enviar
+                const ch = sb.channel(nomeCanal);
+                
                 ch.subscribe(async (status) => {
                     if (status === 'SUBSCRIBED') {
-                        await ch.send({ type: 'broadcast', event: 'msg', payload: msg });
-                        setTimeout(() => sb.removeChannel(ch), 500);
+                        await ch.send({
+                            type: 'broadcast',
+                            event: 'msg',
+                            payload: msg
+                        });
+                        console.log('✅ Mensagem enviada via broadcast');
+                        setTimeout(() => {
+                            sb.removeChannel(ch);
+                        }, 500);
                     }
                 });
+                
             } catch(e) {
-                console.log('Erro envio:', e);
+                console.error('❌ Erro ao enviar:', e);
             }
         }
 
@@ -712,7 +558,129 @@
         function carregarMensagens() {
             const chave = 'wp_msgs_' + [eu.id, conversaAtual.id].sort().join('_');
             const msgs = JSON.parse(localStorage.getItem(chave) || '[]');
+            document.getElementById('messagesArea').innerHTML = '';
             msgs.forEach(msg => mostrarMensagem(msg, msg.de === eu.id));
+        }
+
+        // ============ INTERFACE ============
+        function fazerLogin() {
+            const nome = document.getElementById('nameInput').value.trim();
+            if (!nome || nome.length < 2) return alert('Digite um nome válido');
+
+            eu = { id: 'u_' + Date.now(), nome: nome };
+            localStorage.setItem('wp_user', JSON.stringify(eu));
+            
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('meuNome').textContent = nome;
+            document.getElementById('meuAvatar').textContent = nome.substr(0,2).toUpperCase();
+
+            criarCanalPresenca();
+            setTimeout(() => anunciarOnline(), 500);
+        }
+
+        function sair() {
+            if (canalPresenca) {
+                sb.removeChannel(canalPresenca);
+                canalPresenca = null;
+            }
+            
+            // Remover todos os canais de mensagens
+            Object.values(canaisMensagens).forEach(ch => sb.removeChannel(ch));
+            canaisMensagens = {};
+            
+            eu = null;
+            conversaAtual = null;
+            usuariosOnline = {};
+            localStorage.removeItem('wp_user');
+            document.getElementById('loginOverlay').style.display = 'flex';
+            document.getElementById('nameInput').value = '';
+            fecharChat();
+        }
+
+        function atualizarLista() {
+            document.getElementById('listaConversas').innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">⏳</div>
+                    <h3>Atualizando...</h3>
+                </div>
+            `;
+            
+            if (!canalPresenca && eu) {
+                criarCanalPresenca();
+            }
+            
+            if (canalPresenca) {
+                anunciarOnline();
+                canalPresenca.send({
+                    type: 'broadcast',
+                    event: 'ping_all',
+                    payload: {}
+                });
+                
+                setTimeout(() => renderizarLista(), 1500);
+            }
+        }
+
+        function renderizarLista() {
+            const container = document.getElementById('listaConversas');
+            const users = Object.values(usuariosOnline).filter(u => u.id !== eu?.id);
+            
+            if (users.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">👥</div>
+                        <h3>Nenhum contato online</h3>
+                        <p>Abra em outro navegador e faça login</p>
+                        <button onclick="atualizarLista()">🔄 Atualizar</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = users.map(u => {
+                const ultima = ultimaMensagem[u.id];
+                return `
+                    <div class="chat-item ${conversaAtual?.id === u.id ? 'active' : ''}" onclick="abrirConversa('${u.id}', '${u.nome}')">
+                        <div class="user-avatar">
+                            ${u.nome.substr(0,2).toUpperCase()}
+                            <div class="online-dot"></div>
+                        </div>
+                        <div class="user-info">
+                            <div class="user-name">${u.nome}</div>
+                            <div class="user-status">${ultima ? ultima.texto.substr(0, 30) : 'Online'}</div>
+                        </div>
+                        <div class="user-time">${ultima ? new Date(ultima.time).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}) : 'agora'}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function abrirConversa(userId, nome) {
+            conversaAtual = { id: userId, nome: nome };
+            
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('chatHeader').style.display = 'flex';
+            document.getElementById('messagesArea').style.display = 'block';
+            document.getElementById('inputArea').style.display = 'flex';
+            document.getElementById('chatName').textContent = nome;
+            document.getElementById('chatAvatar').textContent = nome.substr(0,2).toUpperCase();
+            document.getElementById('chatStatus').textContent = 'online';
+            
+            // Criar canal de mensagens para este usuário
+            criarCanalMensagens(userId);
+            
+            // Carregar mensagens
+            carregarMensagens();
+            renderizarLista();
+        }
+
+        function fecharChat() {
+            conversaAtual = null;
+            document.getElementById('welcomeScreen').style.display = 'flex';
+            document.getElementById('chatHeader').style.display = 'none';
+            document.getElementById('messagesArea').style.display = 'none';
+            document.getElementById('inputArea').style.display = 'none';
+            document.getElementById('messagesArea').innerHTML = '';
         }
 
         // Eventos
@@ -740,7 +708,7 @@
                 document.getElementById('loginOverlay').style.display = 'none';
                 document.getElementById('meuNome').textContent = eu.nome;
                 document.getElementById('meuAvatar').textContent = eu.nome.substr(0,2).toUpperCase();
-                canalAtual = criarCanalPresenca();
+                criarCanalPresenca();
                 setTimeout(() => anunciarOnline(), 500);
             }
         });
